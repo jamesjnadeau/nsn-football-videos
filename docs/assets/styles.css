@@ -315,11 +315,23 @@ main { padding: 24px 16px 48px; }
 
 @media (min-width: 1000px) {
   .game-grid.has-side { grid-template-columns: 2fr 1fr; }
-  /* The plays list follows a long broadcast, so let it scroll by itself
-     rather than dragging the page down past the video. */
+  /* A rectangle the height of the left column, scrolling inside itself: the
+     plays panel must not lengthen the page or move the layout as plays are
+     added. --side-h is measured in app.js, since no stylesheet can read a
+     sibling's height. The cap keeps the panel on screen on a wide display,
+     where a two-thirds-width 16:9 video is already taller than the viewport. */
+  /* The column stretches to the row's height even when the panel inside it is
+     capped, which is what gives the sticky panel room to travel. */
+  .game-grid.has-side .game-side { align-self: stretch; }
   .game-grid.has-side .game-side .panel {
     position: sticky; top: 16px;
-    max-height: calc(100vh - 32px); overflow-y: auto;
+    margin-top: 0;                 /* the panel's top lines up with the video's */
+    height: min(var(--side-h, 70vh), calc(100vh - 32px));
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  .game-grid.has-side .game-side .plays-body,
+  .game-grid.has-side .game-side .plays-form {
+    flex: 1 1 auto; min-height: 0; overflow-y: auto;
   }
 }
 .game-primary { min-width: 0; }
@@ -331,6 +343,10 @@ main { padding: 24px 16px 48px; }
   color: var(--muted); font-size: .92rem;
 }
 .detail-facts b { color: var(--text); font-weight: 600; }
+
+/* Any author `display` beats the UA's [hidden] rule, whatever its specificity,
+   so a .btn given hidden would otherwise stay on screen. */
+[hidden] { display: none !important; }
 
 .btn {
   display: inline-block;
@@ -432,7 +448,16 @@ main { padding: 24px 16px 48px; }
 .play-label { font-weight: 600; overflow-wrap: break-word; }
 .play-meta { color: var(--muted); font-size: .8rem; }
 
-.play-actions { margin-top: 12px; }
+/* The head stays put while the body scrolls under it, so the way to mark a
+   play is in the same place whether the broadcast has two plays or eighty. */
+.panel-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.panel-head h2 { margin: 0; }
+.btn.small { padding: 6px 12px; font-size: .84rem; }
+
+/* The form replaces the list rather than joining it. */
+.plays-form:empty { display: none; }
+.panel.form-open .plays-body { display: none; }
+.panel.form-open .mark-form { margin-top: 12px; }
 
 /* ---- forms ------------------------------------------------------------ */
 .mark-form {

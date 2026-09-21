@@ -722,6 +722,32 @@
     };
   }
 
+  var sideObserver = null;   // keeps the plays panel the height of the left column
+  var lastSideH = 0;
+
+  /**
+   * Lock the right column to the height of the left one.
+   *
+   * CSS cannot read a sibling's height and the left column has none of its own
+   * to read -- it is the video's aspect ratio plus however the facts underneath
+   * happen to wrap -- so measure it and hand the number to the stylesheet. The
+   * panel then scrolls inside that height instead of growing the page every
+   * time a play is marked.
+   */
+  function trackSideHeight(grid, primary) {
+    if (typeof ResizeObserver === 'undefined') return;   // falls back to 70vh
+    sideObserver = new ResizeObserver(function () {
+      // Fullscreen takes the video out of the flow; the panel is behind it and
+      // whatever height it had is the one to come back to.
+      if (document.fullscreenElement) return;
+      var h = Math.round(primary.getBoundingClientRect().height);
+      if (!h || h === lastSideH) return;                 // and never oscillate
+      lastSideH = h;
+      grid.style.setProperty('--side-h', h + 'px');
+    });
+    sideObserver.observe(primary);
+  }
+
   /** Put a player in the slot, and the plays panel beside it when signed in. */
   async function attachPlayer(g, slot, side) {
     player = embedPlayer(g, slot);
@@ -732,9 +758,11 @@
     // Plays are part of the marking tool, so they appear with it.
     var panel = playsPanel(g, user);
     side.appendChild(panel);
-    side.closest('.game-grid').classList.add('has-side');
+    var grid = side.closest('.game-grid');
+    grid.classList.add('has-side');
     // Two columns earn the full display; route() clears this on the way out.
     document.body.classList.add('wide');
+    trackSideHeight(grid, grid.querySelector('.game-primary'));
 
     var res = await api('stream?game=' + encodeURIComponent(g.id));
     if (!res || !res.ok || !res.body || !res.body.master) return;   // keep the embed
@@ -753,14 +781,26 @@
 
   /* ---- marked plays ----------------------------------------------------- */
 
-  /** Panel listing approved markers for this broadcast. Signed-in only. */
+  /**
+   * Panel listing approved markers for this broadcast. Signed-in only.
+   *
+   * The panel is a fixed rectangle beside the video, so it is built as a head
+   * that stays put over a body that scrolls. The form does not appear below the
+   * list but *instead* of it: in a column this size a form underneath a long
+   * list is off screen, and one above it shoves every row down the moment it
+   * opens. Marking a play and reading the plays are two different jobs.
+   */
   function playsPanel(g, user) {
     var list = el('ul', { class: 'play-list' });
     var status = el('p', { class: 'muted small' });
-    var actions = el('div', { class: 'play-actions' });
-    var wrap = el('section', { class: 'panel' }, [
-      el('h2', { text: 'Marked plays' }), status, list, actions
-    ]);
+    // Hidden until the API answers: on the Pages mirror there is nothing behind
+    // it, and the whole panel removes itself a moment later.
+    var openBtn = el('button', { type: 'button', class: 'btn secondary small', text: '+ Mark a play' });
+    openBtn.hidden = true;
+    var head = el('div', { class: 'panel-head' }, [el('h2', { text: 'Marked plays' }), openBtn]);
+    var body = el('div', { class: 'plays-body' }, [status, list]);
+    var formSlot = el('div', { class: 'plays-form' });
+    var wrap = el('section', { class: 'panel' }, [head, body, formSlot]);
 
     var shown = [];              // markers currently listed
     var submitted = [];          // numbers this session has sent, approved or not
@@ -773,6 +813,22 @@
 
     function nextLabel() { return String(nextPlayNumber(shown, submitted)); }
 
+    /** Swap the list out for the form. Same door for a new play and an edit. */
+    function openForm(opts) {
+      formSlot.innerHTML = '';
+      formSlot.appendChild(markForm(g, user, opts));
+      wrap.classList.add('form-open');
+      openBtn.hidden = true;
+      formSlot.scrollTop = 0;
+    }
+
+    function closeForm() {
+      markTarget = null;         // a transcript pick in flight has nowhere to go
+      formSlot.innerHTML = '';
+      wrap.classList.remove('form-open');
+      openBtn.hidden = false;
+    }
+
     function draw(markers) {
       shown = markers;
       if (player && player.setMarks) player.setMarks(markers);
@@ -783,41 +839,38 @@
       }
       status.textContent = markers.length + ' play' + (markers.length === 1 ? '' : 's') + ' marked';
       markers.forEach(function (m) {
-        var li = el('li', {});
-        function showRow() {
-          li.innerHTML = '';
-          li.appendChild(playRow(g, m, user, refresh, showForm));
-        }
-        function showForm() {
-          li.innerHTML = '';
-          li.appendChild(markForm(g, user, {
-            existing: m,
-            onCancel: showRow,
-            onSaved: refresh,
-          }));
-        }
-        showRow();
-        list.appendChild(li);
+        list.appendChild(el('li', {}, [
+          playRow(g, m, user, refresh, function () {
+            openForm({
+              existing: m,
+              onCancel: closeForm,
+              onSaved: function () { closeForm(); refresh(); },
+            });
+          }),
+        ]));
       });
     }
+
+    openBtn.addEventListener('click', function () {
+      openForm({
+        nextLabel: nextLabel,
+        // It stays open across saves with the next number already in it, so
+        // the way out is "done with this run", not "cancel what I typed".
+        cancelText: 'Done',
+        onCancel: closeForm,
+        onSaved: function (marker) {
+          if (/^\d{1,6}$/.test(String(marker.label))) submitted.push(Number(marker.label));
+          // Published markers appear at once; queued ones must not, or the
+          // submitter will think everyone can see them.
+          if (marker.status === 'approved') refresh();
+        },
+      });
+    });
 
     api('markers?game=' + encodeURIComponent(g.id)).then(function (res) {
       if (!res) { wrap.remove(); return; }     // no backend: this is the Pages mirror
       draw((res.body && res.body.markers) || []);
-      var open = el('button', { type: 'button', class: 'btn secondary', text: '+ Mark a play' });
-      open.addEventListener('click', function () {
-        open.remove();
-        actions.appendChild(markForm(g, user, {
-          nextLabel: nextLabel,
-          onSaved: function (marker) {
-            if (/^\d{1,6}$/.test(String(marker.label))) submitted.push(Number(marker.label));
-            // Published markers appear at once; queued ones must not, or the
-            // submitter will think everyone can see them.
-            if (marker.status === 'approved') refresh();
-          },
-        }));
-      });
-      actions.appendChild(open);
+      openBtn.hidden = false;
     });
 
     wrap.marks = function () { return shown; };
@@ -994,7 +1047,9 @@
     });
     var buttons = el('div', { class: 'time-row' }, [save]);
     if (opts.onCancel) {
-      var cancel = el('button', { type: 'button', class: 'btn secondary', text: 'Cancel' });
+      var cancel = el('button', {
+        type: 'button', class: 'btn secondary', text: opts.cancelText || 'Cancel',
+      });
       cancel.addEventListener('click', function () { markTarget = null; opts.onCancel(); });
       buttons.appendChild(cancel);
     }
@@ -1525,6 +1580,7 @@
   function route() {
     callbackShowing = false;   // navigating away retires the callback view
     document.body.classList.remove('wide');
+    if (sideObserver) { sideObserver.disconnect(); sideObserver = null; lastSideH = 0; }
     var hash = location.hash || '#/timeline';
     var parts = hash.replace(/^#\/?/, '').split('/');
 

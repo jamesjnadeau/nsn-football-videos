@@ -83,6 +83,14 @@ Signed-in visitors can mark when a play starts and ends, and those marks are sha
 with everyone. Submissions from new accounts go to a review queue; users granted the
 `contributor` role publish directly. Moderators approve markers and hand out that role.
 
+The plays sit in a column beside the video, sized to the left column and scrolling
+inside itself, so marking a fortieth play does not lengthen the page or move
+anything already on it. *+ Mark a play* is in that column's header, where it stays
+put whatever the list is doing, and the form opens **in place of** the list rather
+than above or below it: in a column this narrow a form under a long list is off
+screen, and one over it shoves every row down the moment it opens. Editing a play
+with the ✏ opens the same form the same way.
+
 There are three ways to set a time, and the form starts with the play's number
 already in the Label field — one past the highest number used on that broadcast, so a
 run of plays is two times and *Save*. Typing over it is expected; a play named by hand
