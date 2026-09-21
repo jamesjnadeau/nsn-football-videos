@@ -91,6 +91,21 @@ than above or below it: in a column this narrow a form under a long list is off
 screen, and one over it shoves every row down the moment it opens. Editing a play
 with the ✏ opens the same form the same way.
 
+### Linking to a play
+
+Every row has a chain icon that copies a link to that one play:
+`.../#/game/<broadcast>/play/<marker>`. It is a real anchor, so the browser's own
+*copy link address* and open-in-new-tab work on it, but a plain click copies rather
+than navigating -- going to the page you are already on would only rebuild the player
+underneath you. The address bar is updated with `replaceState` for the same reason.
+
+Marks are public even though marking them is not, so **a play link opens for whoever
+it is sent to**. A signed-in marker lands on the marking player with the play selected
+and scrolled to in the list; everybody else lands on NSN's embed seeked to the same
+second, with NSN's ads, and no plays panel. A link to a play that has since been
+removed says so and leaves the broadcast playable. On the GitHub Pages mirror there is
+no API to resolve the marker, so the game page simply opens as usual.
+
 There are three ways to set a time, and the form starts with the play's number
 already in the Label field — one past the highest number used on that broadcast, so a
 run of plays is two times and *Save*. Typing over it is expected; a play named by hand

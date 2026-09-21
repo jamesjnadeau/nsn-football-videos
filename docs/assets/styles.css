@@ -420,7 +420,10 @@ main { padding: 24px 16px 48px; }
 .play-list > li.done { opacity: .45; }
 
 .play-row {
-  display: grid; grid-template-columns: 72px 1fr auto; gap: 12px; align-items: baseline;
+  /* minmax(0, ...) rather than 1fr: a plain fr floors at the label's min-content
+     width, and with three chips beside it that is what pushes the row off a
+     phone screen. The label wraps instead. */
+  display: grid; grid-template-columns: 72px minmax(0, 1fr) auto; gap: 12px; align-items: baseline;
   width: 100%; text-align: left; font: inherit; cursor: pointer;
   background: var(--surface); color: inherit;
   border: 1px solid var(--border); border-radius: var(--radius); padding: 9px 12px;
@@ -443,6 +446,14 @@ main { padding: 24px 16px 48px; }
 .chip.icon { padding: 5px 9px; line-height: 0; }
 .chip.icon svg { display: block; }
 .chip.primary { color: var(--green); border-color: var(--green); }
+/* The tick that confirms a copied link, in the same green as everything else
+   that has gone right. */
+.chip.icon.is-copied { color: var(--green); border-color: var(--green); }
+/* The play a link points at, or the one whose link was just copied. */
+.play-row-wrap.is-linked > .play-row {
+  border-color: var(--accent);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
 .chip.primary:hover { background: var(--green); color: var(--surface); }
 .play-time { font-variant-numeric: tabular-nums; font-weight: 700; color: var(--green); }
 .play-label { font-weight: 600; overflow-wrap: break-word; }
@@ -458,6 +469,13 @@ main { padding: 24px 16px 48px; }
 .plays-form:empty { display: none; }
 .panel.form-open .plays-body { display: none; }
 .panel.form-open .mark-form { margin-top: 12px; }
+
+/* Announcements for screen readers: read out, never drawn. */
+.sr-only {
+  position: absolute; width: 1px; height: 1px; margin: -1px;
+  padding: 0; border: 0; overflow: hidden; white-space: nowrap;
+  clip: rect(0 0 0 0); clip-path: inset(50%);
+}
 
 /* ---- forms ------------------------------------------------------------ */
 .mark-form {
@@ -510,6 +528,6 @@ main { padding: 24px 16px 48px; }
 .review-actions { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 6px; }
 
 @media (max-width: 560px) {
-  .play-row { grid-template-columns: 58px 1fr auto; gap: 8px; padding: 9px 10px; }
+  .play-row { grid-template-columns: 58px minmax(0, 1fr) auto; gap: 8px; padding: 9px 10px; }
   .cue { grid-template-columns: 58px 1fr; }
 }

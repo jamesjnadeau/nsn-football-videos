@@ -312,7 +312,7 @@
     ]);
   }
 
-  function gameView(id) {
+  function gameView(id, playId) {
     var g = data.games.filter(function (x) { return x.id === id; })[0];
     if (!g) return notFound('That game is not in the archive.');
 
@@ -366,7 +366,7 @@
 
     // The embed goes up straight away so nobody waits on an auth round-trip;
     // a signed-in marker is then upgraded to the readable player in place.
-    attachPlayer(g, playerSlot, side);
+    attachPlayer(g, playerSlot, side, playId);
   }
 
 
@@ -748,15 +748,56 @@
     sideObserver.observe(primary);
   }
 
+  /* ---- linking to one play ----------------------------------------------
+   *
+   * #/game/<broadcast>/play/<id>. Marks are public even though marking them is
+   * not, so a link works for whoever it is sent to: a signed-in marker lands on
+   * the real player with the play selected in the list, and everyone else lands
+   * on NSN's embed seeked to the same second. The link is worth little if it
+   * only opens for the handful of people who can mark plays.
+   */
+
+  function playHash(gameId, markerId) {
+    return '#/game/' + encodeURIComponent(gameId) + '/play/' + encodeURIComponent(markerId);
+  }
+
+  function playUrl(gameId, markerId) {
+    return location.href.split('#')[0] + playHash(gameId, markerId);
+  }
+
+  /** The marker a play link names, or null. Resolves to null on the mirror. */
+  async function resolvePlay(g, playId) {
+    var res = await api('markers?game=' + encodeURIComponent(g.id));
+    if (!res || !res.body) return null;
+    var found = (res.body.markers || []).filter(function (m) { return m.id === playId; });
+    return found[0] || { missing: true };
+  }
+
+  /** Seek to the linked play and say what it is, once the final player is up. */
+  function showLinkedPlay(slot, playId, m) {
+    if (!playId || !m) return;                 // nothing asked for, or no backend
+    var note = el('p', { class: 'note linked-play' });
+    if (m.missing) {
+      note.textContent = 'That link points at a play that is no longer marked on this broadcast.';
+    } else {
+      note.textContent = 'Opened at \u201c' + m.label + '\u201d, ' + secsToClock(m.startSec) + '.';
+      if (player) player.seek(m.startSec);
+    }
+    slot.parentNode.insertBefore(note, slot.nextSibling);
+  }
+
   /** Put a player in the slot, and the plays panel beside it when signed in. */
-  async function attachPlayer(g, slot, side) {
+  async function attachPlayer(g, slot, side, playId) {
     player = embedPlayer(g, slot);
+    // Started now, waited on last: the seek has to land on whichever player is
+    // still there at the end, not on an embed about to be thrown away.
+    var linked = playId ? resolvePlay(g, playId) : Promise.resolve(null);
 
     var user = await NSNAuth.user();
-    if (!user || isUpcoming(g)) return;
+    if (!user || isUpcoming(g)) { showLinkedPlay(slot, playId, await linked); return; }
 
     // Plays are part of the marking tool, so they appear with it.
-    var panel = playsPanel(g, user);
+    var panel = playsPanel(g, user, playId);
     side.appendChild(panel);
     var grid = side.closest('.game-grid');
     grid.classList.add('has-side');
@@ -765,7 +806,10 @@
     trackSideHeight(grid, grid.querySelector('.game-primary'));
 
     var res = await api('stream?game=' + encodeURIComponent(g.id));
-    if (!res || !res.ok || !res.body || !res.body.master) return;   // keep the embed
+    if (!res || !res.ok || !res.body || !res.body.master) {
+      showLinkedPlay(slot, playId, await linked);                  // keep the embed
+      return;
+    }
 
     slot.innerHTML = '';
     var streamed = await streamPlayer(g, slot, res.body.master);
@@ -774,6 +818,7 @@
     // The plays panel drew its list while the embed was still up, so hand the
     // new timeline what is already on screen.
     if (player && player.setMarks && panel && panel.marks) player.setMarks(panel.marks());
+    showLinkedPlay(slot, playId, await linked);
   }
 
   function seekPlayer(g, sec) { if (player) player.seek(sec); }
@@ -790,7 +835,7 @@
    * list is off screen, and one above it shoves every row down the moment it
    * opens. Marking a play and reading the plays are two different jobs.
    */
-  function playsPanel(g, user) {
+  function playsPanel(g, user, linkedId) {
     var list = el('ul', { class: 'play-list' });
     var status = el('p', { class: 'muted small' });
     // Hidden until the API answers: on the Pages mirror there is nothing behind
@@ -838,17 +883,20 @@
         return;
       }
       status.textContent = markers.length + ' play' + (markers.length === 1 ? '' : 's') + ' marked';
+      var linkedRow = null;
       markers.forEach(function (m) {
-        list.appendChild(el('li', {}, [
-          playRow(g, m, user, refresh, function () {
-            openForm({
-              existing: m,
-              onCancel: closeForm,
-              onSaved: function () { closeForm(); refresh(); },
-            });
-          }),
-        ]));
+        var row = playRow(g, m, user, refresh, function () {
+          openForm({
+            existing: m,
+            onCancel: closeForm,
+            onSaved: function () { closeForm(); refresh(); },
+          });
+        });
+        if (linkedId && m.id === linkedId) { row.classList.add('is-linked'); linkedRow = row; }
+        list.appendChild(el('li', {}, [row]));
       });
+      // Arriving on a play link, the play itself may be eighty rows down.
+      if (linkedRow) linkedRow.scrollIntoView({ block: 'center' });
     }
 
     openBtn.addEventListener('click', function () {
@@ -899,6 +947,37 @@
   /* Drawn rather than typed: the pencil character renders anywhere from a tiny
    * dash to a colour emoji depending on the font stack. This is the same shape
    * in every browser, takes the chip's colour in both themes, and stays crisp. */
+  var CHAIN =
+    '<svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true" focusable="false">' +
+    '<path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"' +
+    ' d="M6.4 9.6a2.9 2.9 0 0 0 4.1 0l2.1-2.1a2.9 2.9 0 1 0-4.1-4.1l-1 1"/>' +
+    '<path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"' +
+    ' d="M9.6 6.4a2.9 2.9 0 0 0-4.1 0L3.4 8.5a2.9 2.9 0 1 0 4.1 4.1l1-1"/></svg>';
+
+  var TICK =
+    '<svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true" focusable="false">' +
+    '<path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"' +
+    ' stroke-linejoin="round" d="M3.2 8.6 6.4 11.8 12.8 4.6"/></svg>';
+
+  /** Copy text, falling back for browsers without the async clipboard API. */
+  async function copyText(text) {
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+        return true;
+      }
+    } catch (_) { /* denied, or no permission: try the old way */ }
+    try {
+      var ta = el('textarea', { value: text, 'aria-hidden': 'true' });
+      ta.style.cssText = 'position:fixed;top:-100px;opacity:0';
+      document.body.appendChild(ta);
+      ta.select();
+      var ok = document.execCommand('copy');
+      ta.remove();
+      return ok;
+    } catch (_) { return false; }
+  }
+
   var PENCIL =
     '<svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true" focusable="false">' +
     '<path fill="currentColor" d="M9.9 3.5 L2.2 11.2 L1.2 14.8 L4.8 13.8 L12.5 6.1 Z"/>' +
@@ -909,6 +988,60 @@
   function canModifyPlay(user, m) {
     if (!user || !m) return false;
     return NSNAuth.is('moderator', user) || m.createdBy === user.id;
+  }
+
+  /**
+   * The chip that hands you a link to one play.
+   *
+   * A real anchor, so the browser's own "copy link address" and open-in-new-tab
+   * work on it -- but a plain click copies rather than navigates, because the
+   * point of the button is to paste the link somewhere, and navigating to the
+   * page you are already on would only rebuild the player underneath you.
+   */
+  function playLink(g, m) {
+    var link = el('a', {
+      class: 'chip icon play-link', href: playHash(g.id, m.id), html: CHAIN,
+      title: 'Copy a link to this play',
+      'aria-label': 'Copy a link to the play "' + m.label + '"',
+    });
+
+    link.addEventListener('click', async function (ev) {
+      if (ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.altKey) return;   // their click, not ours
+      ev.preventDefault();
+      selectPlayRow(link.closest('.play-row-wrap'));
+      // The address bar should show what was copied. replaceState rather than
+      // the hash, which would re-route and reload the video.
+      if (history.replaceState) history.replaceState(null, '', playHash(g.id, m.id));
+
+      var ok = await copyText(playUrl(g.id, m.id));
+      link.innerHTML = ok ? TICK : CHAIN;
+      link.classList.toggle('is-copied', ok);
+      say(ok ? 'Link copied.' : 'Could not copy; the link is in the address bar.');
+      setTimeout(function () {
+        link.innerHTML = CHAIN;
+        link.classList.remove('is-copied');
+      }, 1800);
+    });
+
+    return link;
+  }
+
+  /** One play at a time is the linked one. */
+  function selectPlayRow(row) {
+    document.querySelectorAll('.play-row-wrap.is-linked').forEach(function (n) {
+      n.classList.remove('is-linked');
+    });
+    if (row) row.classList.add('is-linked');
+  }
+
+  /** Announce something to a screen reader without putting it on the page. */
+  function say(message) {
+    var live = document.getElementById('live-region');
+    if (!live) {
+      live = el('p', { id: 'live-region', class: 'sr-only', role: 'status', 'aria-live': 'polite' });
+      document.body.appendChild(live);
+    }
+    live.textContent = message;
   }
 
   function playRow(g, m, user, onChanged, onEdit) {
@@ -926,11 +1059,11 @@
     ]);
     go.addEventListener('click', function () { seekPlayer(g, m.startSec); });
 
-    var row = el('div', { class: 'play-row-wrap' }, [go]);
+    var row = el('div', { class: 'play-row-wrap' }, [go, playLink(g, m)]);
     if (!canModifyPlay(user, m)) return row;
 
     var edit = el('button', {
-      type: 'button', class: 'chip icon', html: PENCIL,
+      type: 'button', class: 'chip icon play-edit', html: PENCIL,
       title: 'Edit this play', 'aria-label': 'Edit the play "' + m.label + '"',
     });
     edit.addEventListener('click', onEdit);
@@ -1597,7 +1730,9 @@
       schoolsView();
     } else if (parts[0] === 'game' && parts[1]) {
       setTab(null);
-      gameView(decodeURIComponent(parts[1]));
+      // .../play/<id> opens the broadcast at one marked play.
+      gameView(decodeURIComponent(parts[1]),
+               parts[2] === 'play' && parts[3] ? decodeURIComponent(parts[3]) : null);
     } else if (parts[0] === 'account') {
       setTab(null);
       accountView();
