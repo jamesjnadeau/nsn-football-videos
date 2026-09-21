@@ -79,5 +79,9 @@ re-fetching.
 
 ## Publishing
 
-`docs/` is ready for GitHub Pages — in the repository settings, set Pages to
-deploy from a branch and pick `/docs`.
+`.github/workflows/deploy-pages.yml` publishes `docs/` to GitHub Pages on every
+push to `main`, and `refresh-data.yml` calls it after a data refresh that
+actually changed something. The first run turns Pages on by itself, so the
+repository settings do not need to be touched.
+
+The site lands at `https://jamesjnadeau.github.io/nsn-football-videos/`.

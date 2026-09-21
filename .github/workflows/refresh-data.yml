@@ -6,12 +6,13 @@ on:
     - cron: '0 10 * * 1'
   workflow_dispatch:
 
-permissions:
-  contents: write
-
 jobs:
   refresh:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      changed: ${{ steps.commit.outputs.changed }}
     steps:
       - uses: actions/checkout@v4
 
@@ -23,9 +24,11 @@ jobs:
         run: python3 scripts/fetch_games.py
 
       - name: Commit any changes
+        id: commit
         run: |
           if git diff --quiet -- docs/data/games.json data/raw_broadcasts.json; then
             echo "No new broadcasts."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           git config user.name  "github-actions[bot]"
@@ -33,3 +36,14 @@ jobs:
           git add docs/data/games.json data/raw_broadcasts.json
           git commit -m "Refresh NSN game data"
           git push
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+  # Republish only when the data actually moved.
+  deploy:
+    needs: refresh
+    if: needs.refresh.outputs.changed == 'true'
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    uses: ./.github/workflows/deploy-pages.yml
