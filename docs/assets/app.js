@@ -76,20 +76,41 @@
         })
       : el('div', { class: 'thumb' });
 
-    return el('li', {}, [
-      el('a', { class: 'game', href: '#/game/' + g.id }, [
-        thumb,
-        el('span', { class: 'meta' }, [matchup, el('p', { class: 'sub', text: subParts.join(' · ') })]),
-        el('span', { class: 'chev', 'aria-hidden': 'true', text: '›' })
-      ])
+    // The card is a <li>, not an <a>: it holds two links, and an <a> cannot be
+    // nested inside another. The matchup link is "stretched" over the whole card
+    // via ::after so the card still clicks through to the game page, and the NSN
+    // link sits above it.
+    var title = el('a', { class: 'game-link', href: '#/game/' + g.id }, [matchup]);
+
+    return el('li', { class: 'game' }, [
+      thumb,
+      el('span', { class: 'meta' }, [title, el('p', { class: 'sub', text: subParts.join(' · ') })]),
+      nsnLink(g, 'NSN ↗', 'card-nsn')
     ]);
+  }
+
+  /* An outbound link to NSN's own page for a broadcast.
+   *
+   * Deliberately rel="noopener" and NOT "noreferrer": NSN should be able to see
+   * that the visit came from here and attribute it. Their page is also where
+   * their display advertising runs, which this site does not reproduce, so
+   * sending real traffic there is the point of the link. */
+  function nsnLink(g, label, cls) {
+    var a = el('a', {
+      class: cls, href: g.nsnUrl, target: '_blank', rel: 'noopener',
+      title: 'Open this broadcast on nsnsports.net'
+    }, [document.createTextNode(label)]);
+    // The card behind it navigates to the local game page; this must not.
+    a.addEventListener('click', function (ev) { ev.stopPropagation(); });
+    return a;
   }
 
   /** Render games grouped into season sections, newest season first. */
   function seasonSections(games, opts) {
+    opts = opts || {};
     var frag = document.createDocumentFragment();
     if (!games.length) {
-      frag.appendChild(el('p', { class: 'empty', text: 'No games match that search.' }));
+      frag.appendChild(el('p', { class: 'empty', text: opts.emptyText || 'No games match that search.' }));
       return frag;
     }
     var seasons = [];
@@ -114,11 +135,21 @@
   /* ---- views ---------------------------------------------------------- */
 
   function timelineView() {
-    var state = { q: '', season: 'all' };
+    // Default to games that have actually aired: an upcoming fixture has no
+    // video to watch yet, so it does not belong at the top of an archive.
+    var state = { q: '', season: 'all', when: 'past' };
 
     var search = el('input', {
       type: 'search', placeholder: 'Search team, matchup or round…', 'aria-label': 'Search games'
     });
+
+    var whenSel = el('select', { 'aria-label': 'Filter by whether the game has aired' });
+    [['past', 'Past games'], ['upcoming', 'Upcoming games'], ['all', 'Past + upcoming']]
+      .forEach(function (o) {
+        whenSel.appendChild(el('option', { value: o[0], text: o[1] }));
+      });
+    whenSel.value = state.when;
+
     var seasonSel = el('select', { 'aria-label': 'Filter by season' });
     seasonSel.appendChild(el('option', { value: 'all', text: 'All seasons' }));
     uniqueSeasons().forEach(function (s) {
@@ -131,27 +162,37 @@
     function apply() {
       var q = state.q.trim().toLowerCase();
       var games = data.games.filter(function (g) {
+        if (state.when === 'past' && isUpcoming(g)) return false;
+        if (state.when === 'upcoming' && !isUpcoming(g)) return false;
         if (state.season !== 'all' && String(g.season) !== state.season) return false;
         if (!q) return true;
         return (g.title + ' ' + g.teams.join(' ') + ' ' + g.round).toLowerCase().indexOf(q) !== -1;
       });
       count.textContent = games.length + ' of ' + data.games.length + ' games';
       results.innerHTML = '';
-      results.appendChild(seasonSections(games));
+      results.appendChild(seasonSections(games, { emptyText: emptyTextFor(state) }));
     }
 
     search.addEventListener('input', function () { state.q = search.value; apply(); });
+    whenSel.addEventListener('change', function () { state.when = whenSel.value; apply(); });
     seasonSel.addEventListener('change', function () { state.season = seasonSel.value; apply(); });
 
     render([
       el('div', { class: 'page-head' }, [
         el('h1', { text: 'Game timeline' }),
-        el('p', { text: 'Every Vermont high school football broadcast NSN has posted, newest first.' })
+        el('p', { text: 'Vermont high school football broadcasts from NSN, newest first.' })
       ]),
-      el('div', { class: 'controls' }, [search, seasonSel, count]),
+      el('div', { class: 'controls' }, [search, whenSel, seasonSel, count]),
       results
     ]);
     apply();
+  }
+
+  /** Say why the list is empty, rather than always blaming the search box. */
+  function emptyTextFor(state) {
+    if (state.q.trim()) return 'No games match that search.';
+    if (state.when === 'upcoming') return 'No upcoming games are scheduled right now.';
+    return 'No games to show.';
   }
 
   function schoolsView() {
@@ -265,10 +306,7 @@
     if (g.requiresLogin) {
       kids.push(el('p', { class: 'note', text: 'NSN requires a subscription or access pass to watch this broadcast.' }));
     }
-    kids.push(el('p', {}, [
-      el('a', { class: 'btn', href: g.nsnUrl, rel: 'noopener', target: '_blank', text: 'Watch on NSN Sports' }),
-      document.createTextNode(' ')
-    ]));
+    kids.push(el('p', {}, [nsnLink(g, 'Watch on NSN Sports ↗', 'btn')]));
     kids.push(teamLinks);
 
     render(kids);

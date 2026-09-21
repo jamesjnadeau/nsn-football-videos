@@ -221,6 +221,11 @@ def normalize(raw):
         "round": round_name,
         "embedUrl": raw.get("embed_code_src") or "",
         "thumbnail": raw.get("medium_image") or raw.get("small_image") or raw.get("large_image") or "",
+        # Some broadcasts also carry a "download_url" that serves the video file
+        # directly. It is deliberately not captured: it bypasses NSN's player and
+        # with it the pre-roll/mid-roll ads and the view tracking that pay for
+        # this coverage. Link to the player, never around it.
+        #
         # page_link often points at whichever sponsor page carried the stream;
         # the Vermont hub plays any broadcast id, so it is the stabler link.
         "nsnUrl": f"https://www.nsnsports.net/high-schools/vermont/?bfplayvid={raw.get('id')}",

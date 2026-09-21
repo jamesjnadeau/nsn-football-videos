@@ -5,16 +5,47 @@ A small static site that indexes the Vermont high school football broadcasts
 published on [NSN Sports](https://www.nsnsports.net/high-schools/vermont/) and
 makes them browsable two ways:
 
-- **Timeline** — every broadcast, newest first, grouped by season, with a search
-  box and a season filter.
+- **Timeline** — broadcasts newest first, grouped by season, with a search box, a
+  season filter, and a past/upcoming filter that **defaults to games that have
+  aired** (an upcoming fixture has no video behind it yet). Switch it to
+  "Upcoming games" or "Past + upcoming" to see scheduled ones.
 - **By school** — all 40 programs in the archive, each with its own page listing
-  that team's games season by season.
+  that team's games season by season. These deliberately keep showing upcoming
+  fixtures, since with the timeline filtered they are the only place to see when
+  a team plays next.
 
 Each game has a detail page with the NSN player embedded, the kickoff time, the
 playoff round where there is one, and links through to both schools.
 
 The video itself is hosted and owned by NSN. This site stores no video — only
 titles, dates, schools and the links needed to play a broadcast on NSN.
+
+## Respecting NSN
+
+The point of this site is to make NSN's catalogue easier to browse, not to take
+income from the people producing it. What embedding their player actually does,
+checked against their endpoints:
+
+| Revenue stream | When watched here |
+| --- | --- |
+| Video pre-roll / mid-roll | **Preserved.** Each broadcast's VMAP defines linear pre-roll and mid-roll breaks loaded through the Google IMA SDK; sponsor-site broadcasts carry live `pubads.g.doubleclick.net` tags that serve inside the embed just as they do on NSN's own page. |
+| View tracking | **Preserved.** The VMAP sets `allowStatTracking="true"` and names an analytics stream, so plays from here still count. |
+| Sponsor thumbnails | **Preserved.** The card images *are* sponsor creative. |
+| Display banner ads | **Lost.** `nsnsports.net` runs Google Ad Manager slots that only render on their own pages. |
+
+So the gap is display advertising and page views. Rules that follow from that,
+for anyone changing this code:
+
+- **Embed the player, never rehost.** No copying video, no `download_url` — a
+  direct file link skips the player and every ad in it.
+- **Keep the outbound links.** Every card and game page links to NSN's page for
+  that broadcast, which is where their display ads run.
+- **Keep the referrer.** Outbound links use `rel="noopener"` and must never add
+  `noreferrer`, so NSN can see and attribute the traffic.
+- **Keep the sponsor thumbnails** rather than substituting generic artwork.
+
+None of this substitutes for asking. If this site ever gets real traffic, the
+right move is to contact NSN directly.
 
 ## How it works
 

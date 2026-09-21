@@ -22,7 +22,7 @@ body {
      auto margin on a grid item shrink-wraps it instead of stretching. */
   min-height: 100vh;
   display: grid;
-  grid-template-rows: auto 1fr auto;
+  grid-template-rows: auto auto 1fr auto;
   background: var(--bg);
   color: var(--text);
   font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -72,6 +72,18 @@ a { color: var(--green); }
 .tabs a:hover { background: rgba(255, 255, 255, .12); color: #fff; }
 .tabs a[aria-current="page"] { background: #fff; color: var(--green-dark); }
 
+/* ---- NSN credit ------------------------------------------------------ */
+.credit {
+  margin: 0;
+  padding: 9px 0;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  font-size: .82rem;
+  color: var(--muted);
+}
+.credit .wrap { display: block; }
+.credit a { font-weight: 600; }
+
 /* ---- generic page furniture ------------------------------------------ */
 main { padding: 24px 16px 48px; }
 
@@ -117,6 +129,7 @@ main { padding: 24px 16px 48px; }
 .game-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
 
 .game {
+  position: relative;
   display: grid;
   grid-template-columns: 112px 1fr auto;
   gap: 14px; align-items: center;
@@ -125,11 +138,15 @@ main { padding: 24px 16px 48px; }
   border-radius: var(--radius);
   padding: 10px;
   box-shadow: var(--shadow);
-  text-decoration: none; color: inherit;
+  color: inherit;
   transition: border-color .15s, transform .15s;
 }
 .game:hover { border-color: var(--green); transform: translateY(-1px); }
-.game:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+.game:focus-within { outline: 2px solid var(--green); outline-offset: 2px; }
+
+/* Stretched link: the whole card opens the game page. */
+.game-link { color: inherit; text-decoration: none; }
+.game-link::after { content: ''; position: absolute; inset: 0; border-radius: var(--radius); }
 
 .game .thumb {
   width: 112px; aspect-ratio: 16 / 9;
@@ -139,10 +156,9 @@ main { padding: 24px 16px 48px; }
 .game .meta { min-width: 0; }
 .game .matchup {
   margin: 0 0 3px; font-weight: 650; font-size: 1rem;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 .game .sub { margin: 0; color: var(--muted); font-size: .85rem; }
-.game .chev { color: var(--muted); font-size: 1.3rem; padding-right: 6px; }
 
 .badge {
   display: inline-block; vertical-align: middle;
@@ -153,6 +169,19 @@ main { padding: 24px 16px 48px; }
 .badge.playoff { background: #fdecef; color: var(--accent); }
 .badge.upcoming { background: #e7f1ec; color: var(--green); }
 .badge.part { background: #eef0ed; color: var(--muted); }
+
+/* Sits above the stretched link so it stays clickable in its own right. */
+.card-nsn {
+  position: relative; z-index: 1;
+  padding: 6px 10px; margin-right: 2px;
+  border: 1px solid var(--border); border-radius: 999px;
+  font-size: .72rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .04em;
+  color: var(--muted); text-decoration: none;
+  white-space: nowrap;
+}
+.card-nsn:hover { border-color: var(--green); color: var(--green); background: var(--bg); }
+.card-nsn:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
 
 /* ---- schools --------------------------------------------------------- */
 .school-grid {
@@ -216,9 +245,11 @@ main { padding: 24px 16px 48px; }
 
 /* ---- small screens --------------------------------------------------- */
 @media (max-width: 560px) {
-  .game { grid-template-columns: 84px 1fr; }
-  .game .thumb { width: 84px; }
-  .game .chev { display: none; }
+  /* Two columns only: the NSN pill drops to its own row beside the thumbnail
+     so long co-op names like "Mt. Abraham/Vergennes" keep the full width. */
+  .game { grid-template-columns: 84px 1fr; gap: 8px 12px; }
+  .game .thumb { width: 84px; align-self: start; }
+  .card-nsn { grid-column: 2; justify-self: start; padding: 5px 9px; font-size: .68rem; }
   .controls .count { margin-left: 0; width: 100%; }
 }
 
