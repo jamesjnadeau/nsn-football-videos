@@ -102,6 +102,16 @@ The same `docs/` is served from two places:
 
 - **Netlify** runs the full app — `netlify.toml` publishes `docs/` and deploys the
   functions. Netlify Identity must be enabled on the site for sign-in to work.
+
+  Identity delivers invites, password resets and email confirmations as a URL
+  fragment (`/#invite_token=…`). `auth.js` captures that fragment synchronously at
+  load, strips it from the address bar, and `app.js` renders a set-password form
+  before the game data has even arrived. Two things there are easy to get wrong and
+  are covered by tests: the token is spent only when the form is submitted, so a
+  reload does not burn a single-use link; and `acceptInvite()` / `recoverPassword()`
+  do not write the `nf_jwt` cookie the functions authenticate from, so each is
+  followed by an explicit `login()`. Where the Identity instance has signup disabled,
+  the sign-in form hides the "create an account" path and says so.
 - **GitHub Pages** is a read-only mirror. It cannot run functions, so `app.js` probes
   `/api/markers`; where that is missing, the play and commentary panels remove
   themselves and the sign-in link hides. The archive itself works identically.
@@ -121,7 +131,8 @@ netlify dev            # full app: functions, Identity, Blobs
 python3 -m http.server 8000 --directory docs
 ```
 
-`npm test` runs the unit tests over `netlify/lib` (transcript parsing, marker
+`npm test` runs the unit tests over `netlify/lib` and `docs/assets/auth.js`
+(transcript parsing, auth-fragment parsing, marker
 validation, role rules, and the compare-and-swap that stops concurrent submissions
 overwriting each other); `python3 scripts/test_parse.py` covers the scraper.
 

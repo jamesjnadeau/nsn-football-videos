@@ -641,8 +641,21 @@
     var submit = el('button', { type: 'submit', class: 'btn', text: 'Sign in' });
     var toggle = el('button', { type: 'button', class: 'linkish', text: 'Create an account instead' });
     var forgot = el('button', { type: 'button', class: 'linkish', text: 'Forgot password?' });
+    var inviteNote = el('p', { class: 'small muted' });
 
     name.style.display = 'none';
+
+    // An invite-only instance rejects signup outright, so do not offer a door
+    // that is locked. Settings are unavailable on the mirror; leave it as-is.
+    NSNAuth.settings().then(function (s) {
+      if (s && s.disableSignup) {
+        mode = 'login';
+        toggle.style.display = 'none';
+        name.style.display = 'none';
+        submit.textContent = 'Sign in';
+        inviteNote.textContent = 'This site is invite-only — ask a moderator for an invite.';
+      }
+    });
     toggle.addEventListener('click', function () {
       mode = mode === 'login' ? 'signup' : 'login';
       submit.textContent = mode === 'login' ? 'Sign in' : 'Create account';
@@ -665,6 +678,7 @@
       el('div', { class: 'time-row' }, [el('label', { class: 'time-label', text: 'Name' }), name]),
       el('div', { class: 'time-row' }, [submit, toggle, forgot]),
       msg,
+      inviteNote,
     ]);
 
     form.addEventListener('submit', async function (ev) {
@@ -690,6 +704,116 @@
     });
 
     return form;
+  }
+
+  /* ---- invite / reset links ---------------------------------------------
+   *
+   * Identity mails people here with a token in the URL fragment. auth.js has
+   * already captured and stripped it by the time this runs; this view spends it.
+   * It renders before the game data arrives, so an invite still works when
+   * games.json is slow or missing. */
+
+  var callbackShowing = false;
+
+  function goToAccount() {
+    callbackShowing = false;
+    NSNAuth.clearPending();
+    if (location.hash === '#/account') route();
+    else location.hash = '#/account';   // fires hashchange, which routes
+  }
+
+  /** Shared by the invite and the password-reset flows; `submit` spends the token. */
+  function passwordForm(opts) {
+    var pass = el('input', { type: 'password', required: 'required', minlength: '8', autocomplete: 'new-password', 'aria-label': 'New password' });
+    var again = el('input', { type: 'password', required: 'required', minlength: '8', autocomplete: 'new-password', 'aria-label': 'Repeat password' });
+    var name = opts.askName ? el('input', { type: 'text', placeholder: 'Display name (optional)', 'aria-label': 'Display name' }) : null;
+    var msg = el('p', { class: 'small' });
+    var submit = el('button', { type: 'submit', class: 'btn', text: opts.submitText });
+
+    var rows = [
+      el('div', { class: 'time-row' }, [el('label', { class: 'time-label', text: 'Password' }), pass]),
+      el('div', { class: 'time-row' }, [el('label', { class: 'time-label', text: 'Repeat' }), again]),
+    ];
+    if (name) rows.push(el('div', { class: 'time-row' }, [el('label', { class: 'time-label', text: 'Name' }), name]));
+    rows.push(el('div', { class: 'time-row' }, [submit]));
+    rows.push(msg);
+
+    var form = el('form', { class: 'mark-form' }, rows);
+
+    form.addEventListener('submit', async function (ev) {
+      ev.preventDefault();
+      if (pass.value.length < 8) { msg.textContent = 'Use at least 8 characters.'; return; }
+      if (pass.value !== again.value) { msg.textContent = 'Those two passwords do not match.'; return; }
+      submit.disabled = true;
+      msg.textContent = 'Working…';
+      try {
+        var result = await opts.submit(pass.value, name ? name.value.trim() : '');
+        // The password stuck but the session did not; let them in by hand.
+        if (result && result.needsSignIn) {
+          msg.textContent = 'Your password is saved, but signing in did not finish. Sign in below with '
+            + ((result.user && result.user.email) || 'your email address') + '.';
+          form.appendChild(authForm());
+          return;
+        }
+        goToAccount();
+      } catch (err) {
+        msg.textContent = (err && err.message) || 'That did not work.';
+        submit.disabled = false;
+      }
+    });
+
+    return form;
+  }
+
+  function authCallbackView(pending) {
+    callbackShowing = true;
+
+    if (pending.kind === 'error') {
+      render([
+        el('div', { class: 'page-head' }, [
+          el('h1', { text: 'That link did not work' }),
+          el('p', { text: pending.message }),
+        ]),
+        el('p', { class: 'note', text: 'Invite and password-reset links can only be used once, and they expire. Ask a moderator for a fresh invite, or use "Forgot password?" on the sign-in page.' }),
+        el('p', {}, [el('a', { class: 'btn', href: '#/account', text: 'Go to sign in' })]),
+      ]);
+      NSNAuth.clearPending();
+      return;
+    }
+
+    if (pending.kind === 'confirmation' || pending.kind === 'email_change') {
+      var note = el('p', { class: 'loading', text: 'Confirming…' });
+      render([
+        el('div', { class: 'page-head' }, [el('h1', { text: 'Confirming your email' })]),
+        note,
+      ]);
+      NSNAuth.confirmEmail(pending.token).then(goToAccount).catch(function (err) {
+        note.className = 'empty';
+        note.textContent = (err && err.message) || 'That link could not be confirmed.';
+      });
+      return;
+    }
+
+    var invite = pending.kind === 'invite';
+    render([
+      el('div', { class: 'page-head' }, [
+        el('h1', { text: invite ? 'Set your password' : 'Choose a new password' }),
+        el('p', {
+          text: invite
+            ? 'You have been invited to help mark plays. Pick a password to finish setting up your account.'
+            : 'Pick a new password for your account.',
+        }),
+      ]),
+      passwordForm({
+        askName: invite,
+        submitText: invite ? 'Create my account' : 'Save new password',
+        submit: function (password, name) {
+          return invite
+            ? NSNAuth.acceptInvite(pending.token, password, name)
+            : NSNAuth.resetPassword(pending.token, password);
+        },
+      }),
+    ]);
   }
 
   /* ---- moderation ------------------------------------------------------ */
@@ -872,8 +996,13 @@
   }
 
   function route() {
+    callbackShowing = false;   // navigating away retires the callback view
     var hash = location.hash || '#/timeline';
     var parts = hash.replace(/^#\/?/, '').split('/');
+
+    // Every view but the account page reads the game data. Until it lands,
+    // leave whatever is on screen -- the loading note, or an invite form.
+    if (!data && parts[0] !== 'account') { refreshAccountLink(); return; }
 
     if (parts[0] === 'school' && parts[1]) {
       setTab('schools');
@@ -903,6 +1032,13 @@
     window.scrollTo(0, 0);
   }
 
+  window.addEventListener('hashchange', route);
+
+  // An invite or password-reset link has to work even if the game data is slow
+  // or missing, so this renders without waiting on the fetch below.
+  var startupCallback = NSNAuth.pending();
+  if (startupCallback) authCallbackView(startupCallback);
+
   fetch('data/games.json', { cache: 'no-cache' })
     .then(function (r) {
       if (!r.ok) throw new Error('HTTP ' + r.status);
@@ -916,10 +1052,10 @@
         stamp.textContent = json.count + ' broadcasts indexed · data refreshed ' +
           new Date(json.generated).toLocaleDateString('en-US', { dateStyle: 'medium' });
       }
-      window.addEventListener('hashchange', route);
-      route();
+      if (!callbackShowing) route();
     })
     .catch(function (err) {
+      if (callbackShowing) return;
       view.innerHTML = '';
       view.appendChild(el('p', { class: 'empty', text: 'Could not load the game data (' + err.message + ').' }));
     });
