@@ -1,5 +1,6 @@
 # Vermont Football Video Archive
 
+
 A small static site that indexes the Vermont high school football broadcasts
 published on [NSN Sports](https://www.nsnsports.net/high-schools/vermont/) and
 makes them browsable two ways:
