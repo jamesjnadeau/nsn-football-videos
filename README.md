@@ -89,6 +89,8 @@ docs/                   the static site (published by both hosts)
   data/games.json       generated — do not hand-edit
 netlify/
   functions/            the API: markers, review queue, roles, transcripts
+                        one path per function -- Netlify routes by path, so two
+                        functions sharing one means the second never runs
   lib/                  the logic those functions share, unit-tested
 data/
   raw_broadcasts.json   cached API response, so parsing can be reworked offline
@@ -115,6 +117,12 @@ The same `docs/` is served from two places:
 - **GitHub Pages** is a read-only mirror. It cannot run functions, so `app.js` probes
   `/api/markers`; where that is missing, the play and commentary panels remove
   themselves and the sign-in link hides. The archive itself works identically.
+
+Transcript builds are capped to the broadcasts in `data/games.json`
+(`netlify/lib/games.mjs`). `/api/transcript` and the background build behind it are
+necessarily public, and one build is ~757 requests against NSN's CDN, so an
+unbounded id would be a way to point real load at them. The check fails open: it is
+a brake on abuse, not a security boundary.
 
 Blobs and background functions are used for storage and transcript assembly. Netlify's
 Blobs docs say Pro and above while their pricing pages put Functions, Database and Blobs

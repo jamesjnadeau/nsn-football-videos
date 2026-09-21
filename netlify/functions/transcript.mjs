@@ -4,6 +4,7 @@
  * 202 so the page can poll. Assembling one costs ~757 requests to NSN's CDN,
  * so it happens once per broadcast and only for games somebody actually opens. */
 import { json, problem, openStore } from '../lib/http.mjs';
+import { isKnownGame } from '../lib/games.mjs';
 
 const CACHE_KEY = (id) => `transcript/${id}.json`;
 const BUILDING_KEY = (id) => `building/${id}.json`;
@@ -13,6 +14,8 @@ export default async (req) => {
   const url = new URL(req.url);
   const gameId = url.searchParams.get('game') || '';
   if (!/^\d{1,20}$/.test(gameId)) return problem('game must be a broadcast id');
+  // A build is ~757 requests to NSN's CDN; only ever spend that on our own games.
+  if (!await isKnownGame(gameId, url.origin)) return problem('no such broadcast', 404);
 
   const store = await openStore('transcripts');
   const cached = await store.get(CACHE_KEY(gameId), { type: 'json' });
