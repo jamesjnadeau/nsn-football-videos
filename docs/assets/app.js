@@ -416,6 +416,7 @@
     return {
       node: frame,
       readable: false,
+      setMarks: function () { /* nothing of ours to draw on */ },
       now: function () { return null; },
       seek: function (sec) {
         var base = g.embedUrl.split('#')[0].replace(/[?&]t=\d+/, '');
@@ -426,11 +427,257 @@
     };
   }
 
+  /* ---- controls for the marking player ----------------------------------
+   *
+   * Hand-built rather than `controls`, for two reasons the native bar cannot
+   * meet: it cannot be pinned open (it auto-hides and the page has no say), and
+   * nothing can be drawn into it -- which is what putting the marked plays on
+   * the timeline needs. Everything else here follows from having the bar.
+   */
+
+  var ICONS = {
+    play: '<svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><path fill="currentColor" d="M3.5 2.2 13.2 8 3.5 13.8Z"/></svg>',
+    pause: '<svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><path fill="currentColor" d="M3.4 2.3h3.1v11.4H3.4Zm6.1 0h3.1v11.4H9.5Z"/></svg>',
+    mute: '<svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><path fill="currentColor" d="M7.2 2.4 4 5.2H1.6v5.6H4l3.2 2.8ZM10 5.6l3.8 4.8m0-4.8L10 10.4" stroke="currentColor" stroke-width="1.4" fill="none"/><path fill="currentColor" d="M7.2 2.4 4 5.2H1.6v5.6H4l3.2 2.8Z"/></svg>',
+    sound: '<svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><path fill="currentColor" d="M7.2 2.4 4 5.2H1.6v5.6H4l3.2 2.8Z"/><path d="M9.8 5.6a3.3 3.3 0 0 1 0 4.8M11.9 3.6a6.2 6.2 0 0 1 0 8.8" stroke="currentColor" stroke-width="1.3" fill="none"/></svg>',
+    pin: '<svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M9.6 1.1 14.9 6.4l-1.1 1.1-1-.2-2.4 2.4.3 2.3-1.1 1.1L5.9 9.4 2 13.9l-.8-.8 4.3-4L1.9 5.4 3 4.3l2.3.3 2.4-2.4-.2-1Z"/></svg>',
+    full: '<svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M1.6 1.6h5v1.6H3.2v3.4H1.6Zm7.8 0h5v5h-1.6V3.2H9.4Zm-7.8 7.8h1.6v3.4h3.4v1.6h-5Zm11.2 0h1.6v5h-5v-1.6h3.4Z"/></svg>',
+  };
+
+  var RATES = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2];
+  var HIDE_AFTER_MS = 2600;
+
+  /** Per-viewer conveniences only; never anything that has to survive. */
+  function remember(key, value) {
+    try { localStorage.setItem('nsn.vp.' + key, String(value)); } catch (_) { /* private mode */ }
+  }
+  function recall(key) {
+    try { return localStorage.getItem('nsn.vp.' + key); } catch (_) { return null; }
+  }
+
+  /**
+   * Build the bar and wire it to the video.
+   * Returns the handful of things the rest of the page needs from it.
+   */
+  function videoControls(video, shell) {
+    var playBtn = el('button', { type: 'button', class: 'vp-btn', html: ICONS.play, 'aria-label': 'Play' });
+    var muteBtn = el('button', { type: 'button', class: 'vp-btn', html: ICONS.sound, 'aria-label': 'Mute' });
+    var timeOut = el('span', { class: 'vp-time', text: '0:00 / 0:00' });
+
+    var buffered = el('div', { class: 'vp-buffered' });
+    var played = el('div', { class: 'vp-played' });
+    var marksLayer = el('div', { class: 'vp-marks' });
+    var range = el('input', {
+      type: 'range', class: 'vp-range', min: '0', max: '10000', value: '0', step: '1',
+      'aria-label': 'Seek', 'aria-valuetext': '0:00',
+    });
+    var scrub = el('div', { class: 'vp-scrub' }, [
+      el('div', { class: 'vp-track' }, [buffered, played]), marksLayer, range,
+    ]);
+
+    var rate = el('select', { class: 'vp-rate', 'aria-label': 'Playback speed' });
+    RATES.forEach(function (r) {
+      rate.appendChild(el('option', { value: String(r), text: r === 1 ? '1×' : r + '×' }));
+    });
+
+    var pinBtn = el('button', {
+      type: 'button', class: 'vp-btn vp-pin', html: ICONS.pin,
+      'aria-label': 'Keep the controls visible', 'aria-pressed': 'false',
+    });
+    var fullBtn = el('button', { type: 'button', class: 'vp-btn', html: ICONS.full, 'aria-label': 'Fullscreen' });
+
+    var bar = el('div', { class: 'vp-bar' }, [
+      playBtn, muteBtn, timeOut, scrub, rate, pinBtn, fullBtn,
+    ]);
+
+    /* ---- play state ---- */
+    function toggle() {
+      if (video.paused) video.play().catch(function () { /* autoplay policy */ });
+      else video.pause();
+    }
+    playBtn.addEventListener('click', toggle);
+    video.addEventListener('click', toggle);
+
+    function paintPlayState() {
+      var playing = !video.paused && !video.ended;
+      playBtn.innerHTML = playing ? ICONS.pause : ICONS.play;
+      playBtn.setAttribute('aria-label', playing ? 'Pause' : 'Play');
+      shell.classList.toggle('vp-playing', playing);
+      if (playing) armHide(); else show();
+    }
+    video.addEventListener('play', paintPlayState);
+    video.addEventListener('pause', paintPlayState);
+    video.addEventListener('ended', paintPlayState);
+
+    /* ---- time and the scrubber ---- */
+    var scrubbing = false;
+    var marks = [];
+
+    function paintTime() {
+      var d = video.duration;
+      timeOut.textContent = secsToClock(video.currentTime || 0) + ' / ' + (d && isFinite(d) ? secsToClock(d) : '—');
+      if (!d || !isFinite(d)) return;
+      var frac = Math.min(1, (video.currentTime || 0) / d);
+      played.style.width = (frac * 100).toFixed(3) + '%';
+      if (!scrubbing) {
+        range.value = String(Math.round(frac * 10000));
+        range.setAttribute('aria-valuetext', secsToClock(video.currentTime || 0));
+      }
+    }
+    video.addEventListener('timeupdate', paintTime);
+    video.addEventListener('durationchange', function () { paintTime(); paintMarks(); });
+    video.addEventListener('loadedmetadata', function () { paintTime(); paintMarks(); });
+
+    video.addEventListener('progress', function () {
+      var d = video.duration;
+      if (!d || !isFinite(d) || !video.buffered.length) return;
+      buffered.style.width = ((video.buffered.end(video.buffered.length - 1) / d) * 100).toFixed(3) + '%';
+    });
+
+    function seekFromRange() {
+      var d = video.duration;
+      if (!d || !isFinite(d)) return;
+      var sec = (Number(range.value) / 10000) * d;
+      video.currentTime = sec;
+      played.style.width = ((sec / d) * 100).toFixed(3) + '%';
+      timeOut.textContent = secsToClock(sec) + ' / ' + secsToClock(d);
+      range.setAttribute('aria-valuetext', secsToClock(sec));
+    }
+    range.addEventListener('input', seekFromRange);
+    range.addEventListener('pointerdown', function () { scrubbing = true; });
+    ['pointerup', 'pointercancel', 'blur'].forEach(function (e) {
+      range.addEventListener(e, function () { scrubbing = false; });
+    });
+
+    /* ---- the marked plays, on the timeline ---- */
+    function paintMarks() {
+      marksLayer.innerHTML = '';
+      var d = video.duration;
+      if (!d || !isFinite(d)) return;      // redrawn once the duration lands
+      marks.forEach(function (m) {
+        var left = Math.max(0, Math.min(1, m.startSec / d));
+        var width = Math.max(0, Math.min(1 - left, (m.endSec - m.startSec) / d));
+        marksLayer.appendChild(el('span', {
+          class: 'vp-mark',
+          style: 'left:' + (left * 100).toFixed(3) + '%;width:' + Math.max(width * 100, 0.35).toFixed(3) + '%',
+          title: m.label + ' · ' + secsToClock(m.startSec),
+        }));
+      });
+    }
+
+    /* ---- sound ---- */
+    function paintSound() {
+      var off = video.muted || video.volume === 0;
+      muteBtn.innerHTML = off ? ICONS.mute : ICONS.sound;
+      muteBtn.setAttribute('aria-label', off ? 'Unmute' : 'Mute');
+    }
+    muteBtn.addEventListener('click', function () { video.muted = !video.muted; });
+    video.addEventListener('volumechange', paintSound);
+
+    /* ---- speed ---- */
+    var savedRate = Number(recall('rate'));
+    video.playbackRate = RATES.indexOf(savedRate) !== -1 ? savedRate : 1;
+    rate.value = String(video.playbackRate);
+    rate.addEventListener('change', function () {
+      video.playbackRate = Number(rate.value);
+      remember('rate', rate.value);
+    });
+    video.addEventListener('ratechange', function () { rate.value = String(video.playbackRate); });
+
+    function stepRate(dir) {
+      var i = RATES.indexOf(video.playbackRate);
+      if (i === -1) i = RATES.indexOf(1);
+      var next = RATES[Math.max(0, Math.min(RATES.length - 1, i + dir))];
+      video.playbackRate = next;
+      remember('rate', next);
+    }
+
+    /* ---- auto-hide, and the pin that stops it ---- */
+    var hideTimer = null;
+    var pinned = recall('pinned') === '1';
+
+    function show() {
+      shell.classList.remove('vp-idle');
+      if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; }
+    }
+    function armHide() {
+      show();
+      if (pinned || video.paused) return;
+      hideTimer = setTimeout(function () { shell.classList.add('vp-idle'); }, HIDE_AFTER_MS);
+    }
+    function paintPin() {
+      pinBtn.setAttribute('aria-pressed', pinned ? 'true' : 'false');
+      pinBtn.setAttribute('aria-label', pinned ? 'Let the controls hide' : 'Keep the controls visible');
+      pinBtn.title = pinned ? 'Controls stay visible — click to let them hide' : 'Keep the controls visible';
+      shell.classList.toggle('vp-pinned', pinned);
+    }
+    pinBtn.addEventListener('click', function () {
+      pinned = !pinned;
+      remember('pinned', pinned ? '1' : '0');
+      paintPin();
+      armHide();
+    });
+
+    shell.addEventListener('mousemove', armHide);
+    shell.addEventListener('touchstart', armHide, { passive: true });
+    shell.addEventListener('mouseleave', function () { if (!video.paused) armHide(); });
+    bar.addEventListener('focusin', show);
+    bar.addEventListener('mouseenter', show);
+    bar.addEventListener('mouseleave', function () { if (!video.paused) armHide(); });
+
+    /* ---- fullscreen ---- */
+    fullBtn.addEventListener('click', function () {
+      if (document.fullscreenElement) document.exitFullscreen();
+      else if (shell.requestFullscreen) shell.requestFullscreen().catch(function () {});
+    });
+
+    var skip = function (delta) {
+      var d = video.duration;
+      var to = (video.currentTime || 0) + delta;
+      video.currentTime = Math.max(0, isFinite(d) ? Math.min(d, to) : to);
+      show();
+      armHide();
+    };
+
+    paintPlayState(); paintSound(); paintPin(); paintTime();
+
+    return {
+      bar: bar,
+      setMarks: function (list) { marks = list || []; paintMarks(); },
+      /** Returns true when the key was ours, so the caller can stop the page scrolling. */
+      handleKey: function (ev) {
+        switch (ev.key) {
+          case 'ArrowRight': skip(SKIP_SEC); return true;
+          case 'ArrowLeft': skip(-SKIP_SEC); return true;
+          case 'ArrowUp': video.volume = Math.min(1, video.volume + 0.1); show(); return true;
+          case 'ArrowDown': video.volume = Math.max(0, video.volume - 0.1); show(); return true;
+          case ' ': case 'k': toggle(); return true;
+          case 'm': video.muted = !video.muted; show(); return true;
+          case 'f': fullBtn.click(); return true;
+          case ',': case '<': stepRate(-1); show(); return true;
+          case '.': case '>': stepRate(1); show(); return true;
+          default: return false;
+        }
+      },
+    };
+  }
+
+  var SKIP_SEC = 5;
+
+  // One listener for the life of the page; it defers to whatever player is on
+  // screen, and keeps its hands off anything typed into a field.
+  document.addEventListener('keydown', function (ev) {
+    if (!player || !player.handleKey) return;
+    if (ev.metaKey || ev.ctrlKey || ev.altKey) return;
+    var t = ev.target;
+    if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
+    if (player.handleKey(ev)) ev.preventDefault();
+  });
+
   /** Our own player, over the manifest the server resolved for us. */
   async function streamPlayer(g, slot, master) {
     var video = el('video', {
-      class: 'player', controls: 'controls', playsinline: 'playsinline',
-      preload: 'metadata', title: matchupText(g),
+      class: 'vp-video', playsinline: 'playsinline', preload: 'metadata', title: matchupText(g),
     });
 
     // hls.js wants a URL. The manifest is already absolute throughout, so a
@@ -448,22 +695,29 @@
       hls.attachMedia(video);
     }
 
-    slot.appendChild(video);
+    var shell = el('div', { class: 'vp', tabindex: '-1' }, [video]);
+    var controls = videoControls(video, shell);
+    shell.appendChild(controls.bar);
+
+    slot.appendChild(shell);
     slot.appendChild(el('p', { class: 'muted small player-note' }, [
       document.createTextNode('Marking player — no ads. '),
       nsnLink(g, 'Watch on NSN ↗', 'linkish'),
-      document.createTextNode(' to support the people covering these games.'),
+      document.createTextNode(' to support the people covering these games. '),
+      el('span', { class: 'vp-keys', text: '← → skip 5s · space play · , . speed · m mute · f fullscreen' }),
     ]));
 
     return {
       node: video,
       readable: true,
+      setMarks: controls.setMarks,
+      handleKey: controls.handleKey,
       now: function () {
         return Number.isFinite(video.currentTime) ? video.currentTime : null;
       },
       seek: function (sec) {
         try { video.currentTime = Math.max(0, sec); } catch (_) { /* not ready yet */ }
-        video.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        shell.scrollIntoView({ block: 'center', behavior: 'smooth' });
       },
     };
   }
@@ -476,7 +730,8 @@
     if (!user || isUpcoming(g)) return;
 
     // Plays are part of the marking tool, so they appear with it.
-    side.appendChild(playsPanel(g, user));
+    var panel = playsPanel(g, user);
+    side.appendChild(panel);
     side.closest('.game-grid').classList.add('has-side');
     // Two columns earn the full display; route() clears this on the way out.
     document.body.classList.add('wide');
@@ -488,6 +743,9 @@
     var streamed = await streamPlayer(g, slot, res.body.master);
     // No hls.js and no native HLS: put NSN's embed back rather than nothing.
     player = streamed || (slot.innerHTML = '', embedPlayer(g, slot));
+    // The plays panel drew its list while the embed was still up, so hand the
+    // new timeline what is already on screen.
+    if (player && player.setMarks && panel && panel.marks) player.setMarks(panel.marks());
   }
 
   function seekPlayer(g, sec) { if (player) player.seek(sec); }
@@ -517,6 +775,7 @@
 
     function draw(markers) {
       shown = markers;
+      if (player && player.setMarks) player.setMarks(markers);
       list.innerHTML = '';
       if (!markers.length) {
         status.textContent = 'No plays marked yet.';
@@ -561,6 +820,7 @@
       actions.appendChild(open);
     });
 
+    wrap.marks = function () { return shown; };
     return wrap;
   }
 

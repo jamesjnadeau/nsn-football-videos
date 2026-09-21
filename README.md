@@ -105,10 +105,25 @@ master manifest → subtitle playlist → ~757 WebVTT segments) and cached. It i
 recognition, so proper nouns come through mangled — "Missiskoy" for Missisquoi. It is
 for finding a moment, not for reading facts out of.
 
-This is why we do **not** run our own player, which would allow one-click marking:
-NSN's ad tag is `iu=/29795821/nsn` declaring `fan.hudl.com`, and issuing that from
-another domain would misdeclare their inventory to Google Ad Manager against their own
-account.
+### The marking player's controls
+
+The bar under the marking player is hand-built, because the browser's native one
+cannot be pinned open and nothing can be drawn into it -- and the plays already
+marked on a broadcast belong on the timeline, where they show at a glance which
+parts of two hours are already covered.
+
+| | |
+| --- | --- |
+| `←` / `→` | back / forward 5 seconds |
+| `↑` / `↓` | volume |
+| space, `k` | play / pause |
+| `m`, `f` | mute, fullscreen |
+| `,` / `.` | slower / faster, through 0.25x to 2x |
+
+The keys are ignored while a form field has focus, so typing a label into the
+play form never moves the video. The bar fades out a couple of seconds into
+playback; the pin button holds it open, and that choice and the playback speed
+are both remembered in `localStorage` for the next broadcast.
 
 ## How it works
 

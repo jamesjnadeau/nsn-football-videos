@@ -217,6 +217,94 @@ main { padding: 24px 16px 48px; }
   background: #000; box-shadow: var(--shadow);
 }
 .player-note { margin: 8px 0 0; }
+.vp-keys { display: block; margin-top: 2px; font-size: .78rem; }
+
+/* ---- the marking player ------------------------------------------------
+ * Hand-built controls, because the native bar cannot be pinned open and
+ * nothing can be drawn into it -- and the marked plays belong on the timeline. */
+.vp {
+  position: relative; width: 100%; aspect-ratio: 16 / 9;
+  background: #000; border-radius: var(--radius); overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.vp-video { width: 100%; height: 100%; display: block; object-fit: contain; cursor: pointer; }
+.vp:fullscreen { aspect-ratio: auto; height: 100%; border-radius: 0; }
+
+.vp-bar {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px 11px;
+  background: linear-gradient(to top, rgba(0,0,0,.86), rgba(0,0,0,.55) 55%, rgba(0,0,0,0));
+  color: #fff;
+  transition: opacity .18s ease, transform .18s ease;
+}
+/* Only ever hidden while playing, and never while pinned. */
+.vp.vp-idle:not(.vp-pinned) .vp-bar { opacity: 0; transform: translateY(6px); pointer-events: none; }
+.vp.vp-idle:not(.vp-pinned) .vp-video { cursor: none; }
+/* Focus must never land on something invisible. */
+.vp-bar:focus-within { opacity: 1 !important; transform: none !important; pointer-events: auto !important; }
+
+.vp-btn {
+  flex: none; display: inline-flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px; padding: 0;
+  background: transparent; color: #fff; border: 0; border-radius: 6px; cursor: pointer;
+}
+.vp-btn:hover { background: rgba(255,255,255,.16); }
+.vp-btn:focus-visible, .vp-rate:focus-visible, .vp-range:focus-visible {
+  outline: 2px solid #fff; outline-offset: 1px;
+}
+.vp-pin[aria-pressed="true"] { background: var(--green); }
+
+.vp-time {
+  flex: none; font-size: .8rem; font-variant-numeric: tabular-nums;
+  color: rgba(255,255,255,.92); white-space: nowrap;
+}
+
+.vp-scrub { position: relative; flex: 1 1 auto; min-width: 60px; height: 26px; }
+.vp-track {
+  position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%);
+  height: 5px; border-radius: 3px; background: rgba(255,255,255,.28); overflow: hidden;
+}
+.vp-buffered { position: absolute; inset: 0 auto 0 0; width: 0; background: rgba(255,255,255,.34); }
+.vp-played { position: absolute; inset: 0 auto 0 0; width: 0; background: var(--green); }
+
+/* Marks sit under the range so they never swallow a click meant for seeking;
+   the plays list beside the video is the interactive way to jump to one. */
+.vp-marks { position: absolute; inset: 0; pointer-events: none; }
+.vp-mark {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  height: 13px; min-width: 3px; border-radius: 2px;
+  background: var(--accent); box-shadow: 0 0 0 1px rgba(0,0,0,.45);
+}
+
+.vp-range {
+  position: absolute; inset: 0; width: 100%; height: 100%; margin: 0;
+  -webkit-appearance: none; appearance: none; background: transparent; cursor: pointer;
+}
+.vp-range::-webkit-slider-runnable-track { background: transparent; height: 100%; }
+.vp-range::-moz-range-track { background: transparent; height: 100%; }
+.vp-range::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 13px; height: 13px; border-radius: 50%;
+  background: #fff; border: 0; box-shadow: 0 0 0 1px rgba(0,0,0,.4);
+}
+.vp-range::-moz-range-thumb {
+  width: 13px; height: 13px; border-radius: 50%;
+  background: #fff; border: 0; box-shadow: 0 0 0 1px rgba(0,0,0,.4);
+}
+
+.vp-rate {
+  flex: none; font: inherit; font-size: .78rem; font-weight: 600;
+  padding: 3px 4px; border-radius: 6px; cursor: pointer;
+  background: rgba(255,255,255,.14); color: #fff; border: 1px solid rgba(255,255,255,.28);
+}
+.vp-rate option { color: initial; background: #fff; }
+
+@media (max-width: 560px) {
+  .vp-bar { gap: 6px; padding: 8px 8px 9px; }
+  .vp-time { font-size: .72rem; }
+  .vp-btn { width: 27px; height: 27px; }
+}
 
 /* ---- game page layout --------------------------------------------------
  * One column by default. The second column only exists for signed-in markers,
