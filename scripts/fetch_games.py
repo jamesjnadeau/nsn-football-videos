@@ -219,6 +219,9 @@ def normalize(raw):
         "teams": teams,
         "teamSlugs": [slugify(t) for t in teams],
         "round": round_name,
+        # Bounds the play markers the site collects; costs one VMAP request per
+        # broadcast, so it is fetched separately by add_durations().
+        "durationSec": None,
         "embedUrl": raw.get("embed_code_src") or "",
         "thumbnail": raw.get("medium_image") or raw.get("small_image") or raw.get("large_image") or "",
         # Some broadcasts also carry a "download_url" that serves the video file
@@ -252,6 +255,43 @@ def build(raw_items, all_sports=False):
     return records
 
 
+VMAP_URL = "https://vcloud.hudl.com/api/broadcast/vmap/{}?minify_js=1"
+
+
+def add_durations(records, workers=8):
+    """Fill in each broadcast's run time from its VMAP.
+
+    One request per broadcast, so it runs only over records that do not already
+    have a duration -- a refresh then costs a handful of calls, not 259.
+    """
+    import concurrent.futures as cf
+
+    todo = [r for r in records if not r.get("durationSec")]
+    if not todo:
+        return
+    print(f"fetching durations for {len(todo)} broadcast(s)...", file=sys.stderr)
+
+    def one(rec):
+        try:
+            req = urllib.request.Request(VMAP_URL.format(rec["id"]),
+                                         headers={"User-Agent": USER_AGENT})
+            with urllib.request.urlopen(req, timeout=25) as resp:
+                xml = resp.read().decode("utf-8", "replace")
+            m = re.search(r'<Content[^>]*duration="([^"]+)"', xml)
+            if not m:
+                return
+            h, mi, sec = (m.group(1).split(":") + ["0", "0"])[:3]
+            rec["durationSec"] = round(int(h) * 3600 + int(mi) * 60 + float(sec))
+        except Exception as exc:                      # a missing duration is not fatal
+            print(f"  duration failed for {rec['id']}: {exc}", file=sys.stderr)
+
+    with cf.ThreadPoolExecutor(max_workers=workers) as pool:
+        list(pool.map(one, todo))
+
+    got = sum(1 for r in records if r.get("durationSec"))
+    print(f"  durations known for {got}/{len(records)}", file=sys.stderr)
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--out", type=Path, default=OUT_PATH)
@@ -260,6 +300,8 @@ def main():
                     help="rebuild from the cached raw response instead of fetching")
     ap.add_argument("--all-sports", action="store_true",
                     help="keep every sport, not just football")
+    ap.add_argument("--skip-durations", action="store_true",
+                    help="do not fetch run times (one extra request per new broadcast)")
     args = ap.parse_args()
 
     if args.from_cache:
@@ -272,6 +314,20 @@ def main():
         args.cache.write_text(json.dumps(raw_items, indent=1) + "\n", encoding="utf-8")
 
     records = build(raw_items, all_sports=args.all_sports)
+
+    # Carry forward durations already fetched, so a refresh only asks about new games.
+    if args.out.exists():
+        try:
+            known = {g["id"]: g.get("durationSec")
+                     for g in json.loads(args.out.read_text(encoding="utf-8")).get("games", [])}
+            for r in records:
+                if not r.get("durationSec") and known.get(r["id"]):
+                    r["durationSec"] = known[r["id"]]
+        except (json.JSONDecodeError, KeyError):
+            pass
+
+    if not args.skip_durations:
+        add_durations(records)
 
     payload = {
         "generated": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),

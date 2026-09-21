@@ -20,8 +20,15 @@ jobs:
         with:
           python-version: '3.12'
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
       - name: Check the title parsing
         run: python3 scripts/test_parse.py
+
+      - name: Unit tests
+        run: npm ci && npm test
 
       - name: Fetch broadcasts from NSN
         run: python3 scripts/fetch_games.py

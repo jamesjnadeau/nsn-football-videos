@@ -13,6 +13,50 @@
   var data = null;          // { games: [...] }
   var bySlug = null;        // slug -> { name, slug, games }
 
+  /* ---- backend ---------------------------------------------------------
+   * The same files are served from GitHub Pages, which has no functions. Every
+   * call here resolves to null there, and the UI hides the features that need
+   * them rather than showing errors. */
+
+  var API_ALIVE = null;   // null = not yet probed, then true/false
+
+  async function api(path, opts) {
+    try {
+      var res = await fetch('/api/' + path, Object.assign({
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+      }, opts || {}));
+      // Pages serves its 404 page for these; anything non-JSON means no backend.
+      var type = res.headers.get('content-type') || '';
+      if (res.status === 404 && type.indexOf('json') === -1) { API_ALIVE = false; return null; }
+      API_ALIVE = true;
+      var body = type.indexOf('json') !== -1 ? await res.json() : null;
+      return { ok: res.ok, status: res.status, body: body };
+    } catch (_) {
+      API_ALIVE = false;
+      return null;
+    }
+  }
+
+  function secsToClock(sec) {
+    sec = Math.max(0, Math.round(sec));
+    var h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
+    var mm = h ? String(m).padStart(2, '0') : String(m);
+    return (h ? h + ':' : '') + mm + ':' + String(s).padStart(2, '0');
+  }
+
+  /** "1:02:03" / "12:34" / "754" -> seconds, or null. */
+  function clockToSecs(text) {
+    var t = String(text).trim();
+    if (!t) return null;
+    if (/^\d+$/.test(t)) return Number(t);
+    var parts = t.split(':').map(Number);
+    if (parts.some(function (n) { return !Number.isFinite(n) || n < 0; })) return null;
+    if (parts.length === 2) return parts[0] * 60 + parts[1];
+    if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
+    return null;
+  }
+
   /* ---- helpers ------------------------------------------------------- */
 
   function el(tag, attrs, children) {
@@ -296,11 +340,13 @@
     if (isUpcoming(g)) {
       kids.push(el('p', { class: 'note', text: 'This game has not aired yet. The player opens once NSN starts the broadcast.' }));
     }
+    playerFrame = null;
     if (g.embedUrl) {
-      kids.push(el('iframe', {
+      playerFrame = el('iframe', {
         class: 'player', src: g.embedUrl, title: matchupText(g),
         allow: 'fullscreen', allowfullscreen: 'true', loading: 'lazy', referrerpolicy: 'no-referrer-when-downgrade'
-      }));
+      });
+      kids.push(playerFrame);
     }
     kids.push(facts);
     if (g.requiresLogin) {
@@ -309,7 +355,468 @@
     kids.push(el('p', {}, [nsnLink(g, 'Watch on NSN Sports ↗', 'btn')]));
     kids.push(teamLinks);
 
+    // Both panels remove themselves when there is no backend behind them.
+    markTarget = null;
+    if (!isUpcoming(g)) {
+      kids.push(playsPanel(g));
+      kids.push(transcriptPanel(g));
+    }
+
     render(kids);
+  }
+
+
+  /* ---- play markers + transcript ---------------------------------------
+   * The NSN embed is cross-origin and sealed: we can seek into it with ?t= but
+   * we can never read where it is. So marking anchors to transcript lines (and
+   * to typed timestamps for the older broadcasts with no captions) rather than
+   * to the player's position. */
+
+  var playerFrame = null;   // the <iframe> currently on screen
+
+  function seekPlayer(g, sec) {
+    if (!playerFrame || !g.embedUrl) return;
+    var base = g.embedUrl.split('#')[0].replace(/[?&]t=\d+/, '');
+    var join = base.indexOf('?') === -1 ? '?' : '&';
+    playerFrame.src = base + join + 't=' + Math.max(0, Math.round(sec));
+    playerFrame.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  }
+
+  /** Panel listing approved markers for this broadcast. */
+  function playsPanel(g) {
+    var list = el('ul', { class: 'play-list' });
+    var status = el('p', { class: 'muted small' });
+    var actions = el('div', { class: 'play-actions' });
+    var wrap = el('section', { class: 'panel' }, [
+      el('h2', { text: 'Marked plays' }), status, list, actions
+    ]);
+
+    function draw(markers) {
+      list.innerHTML = '';
+      if (!markers.length) {
+        status.textContent = 'No plays marked yet.';
+        return;
+      }
+      status.textContent = markers.length + ' play' + (markers.length === 1 ? '' : 's') + ' marked';
+      markers.forEach(function (m) {
+        var btn = el('button', { type: 'button', class: 'play-row' }, [
+          el('span', { class: 'play-time', text: secsToClock(m.startSec) }),
+          el('span', { class: 'play-label', text: m.label }),
+          el('span', { class: 'play-meta', text: Math.round(m.endSec - m.startSec) + 's · ' + (m.createdByName || 'someone') })
+        ]);
+        btn.addEventListener('click', function () { seekPlayer(g, m.startSec); });
+        list.appendChild(el('li', {}, [btn]));
+      });
+    }
+
+    api('markers?game=' + encodeURIComponent(g.id)).then(function (res) {
+      if (!res) { wrap.remove(); return; }     // no backend: this is the Pages mirror
+      draw((res.body && res.body.markers) || []);
+      buildMarkButton(g, actions, function (marker) {
+        // Published markers appear at once; queued ones must not, or the
+        // submitter will think everyone can see them.
+        if (marker.status === 'approved') {
+          api('markers?game=' + encodeURIComponent(g.id)).then(function (r) {
+            if (r && r.body) draw(r.body.markers || []);
+          });
+        }
+      });
+    });
+
+    return wrap;
+  }
+
+  /** "Mark a play" button + form, shown only to signed-in users. */
+  function buildMarkButton(g, container, onSaved) {
+    NSNAuth.user().then(function (user) {
+      container.innerHTML = '';
+      if (!user) {
+        container.appendChild(el('p', { class: 'muted small' }, [
+          el('a', { href: '#/account', text: 'Sign in' }),
+          document.createTextNode(' to mark a play.')
+        ]));
+        return;
+      }
+      var open = el('button', { type: 'button', class: 'btn secondary', text: '+ Mark a play' });
+      open.addEventListener('click', function () {
+        open.remove();
+        container.appendChild(markForm(g, user, onSaved));
+      });
+      container.appendChild(open);
+    });
+  }
+
+  var markTarget = null;   // {set: fn} while the form is capturing a transcript line
+
+  function markForm(g, user, onSaved) {
+    var startIn = el('input', { type: 'text', inputmode: 'numeric', placeholder: 'm:ss', 'aria-label': 'Start time' });
+    var endIn = el('input', { type: 'text', inputmode: 'numeric', placeholder: 'm:ss', 'aria-label': 'End time' });
+    var labelIn = el('input', { type: 'text', maxlength: '80', placeholder: 'e.g. Touchdown, Spaulding', 'aria-label': 'Label' });
+    var noteIn = el('input', { type: 'text', maxlength: '280', placeholder: 'Optional note', 'aria-label': 'Note' });
+    var msg = el('p', { class: 'small' });
+
+    function nudge(input, delta) {
+      var cur = clockToSecs(input.value);
+      input.value = secsToClock(Math.max(0, (cur === null ? 0 : cur) + delta));
+    }
+
+    function timeRow(labelText, input, which) {
+      var pick = el('button', { type: 'button', class: 'chip', text: 'from transcript' });
+      pick.addEventListener('click', function () {
+        markTarget = { which: which, set: function (sec) { input.value = secsToClock(sec); } };
+        msg.textContent = 'Now click a commentary line below to set the ' + which + ' time.';
+        var panel = document.getElementById('transcript-panel');
+        if (panel) panel.scrollIntoView({ block: 'start', behavior: 'smooth' });
+      });
+      var check = el('button', { type: 'button', class: 'chip', text: '▶ check' });
+      check.addEventListener('click', function () {
+        var sec = clockToSecs(input.value);
+        if (sec === null) { msg.textContent = 'Enter a time like 12:34 first.'; return; }
+        seekPlayer(g, sec);
+      });
+      var row = el('div', { class: 'time-row' }, [
+        el('label', { class: 'time-label', text: labelText }), input, pick,
+      ]);
+      [['-5', -5], ['-1', -1], ['+1', 1], ['+5', 5]].forEach(function (n) {
+        var b = el('button', { type: 'button', class: 'chip', text: n[0] });
+        b.addEventListener('click', function () { nudge(input, n[1]); });
+        row.appendChild(b);
+      });
+      row.appendChild(check);
+      return row;
+    }
+
+    var save = el('button', { type: 'submit', class: 'btn', text: 'Save play' });
+    var form = el('form', { class: 'mark-form' }, [
+      timeRow('Start', startIn, 'start'),
+      timeRow('End', endIn, 'end'),
+      el('div', { class: 'time-row' }, [el('label', { class: 'time-label', text: 'Label' }), labelIn]),
+      el('div', { class: 'time-row' }, [el('label', { class: 'time-label', text: 'Note' }), noteIn]),
+      el('div', { class: 'time-row' }, [save]),
+      msg,
+    ]);
+
+    form.addEventListener('submit', async function (ev) {
+      ev.preventDefault();
+      var startSec = clockToSecs(startIn.value), endSec = clockToSecs(endIn.value);
+      if (startSec === null || endSec === null) { msg.textContent = 'Both times are needed, as m:ss.'; return; }
+      if (!labelIn.value.trim()) { msg.textContent = 'Give the play a label.'; return; }
+
+      save.disabled = true;
+      msg.textContent = 'Saving…';
+      var res = await api('markers', {
+        method: 'POST',
+        body: JSON.stringify({
+          gameId: g.id, startSec: startSec, endSec: endSec,
+          label: labelIn.value, note: noteIn.value,
+          durationSec: g.durationSec,
+        }),
+      });
+      save.disabled = false;
+
+      if (!res) { msg.textContent = 'Could not reach the server.'; return; }
+      if (!res.ok) { msg.textContent = (res.body && res.body.error) || 'Could not save that.'; return; }
+
+      markTarget = null;
+      if (res.body.status === 'published') {
+        msg.textContent = 'Published — everyone can see it.';
+      } else {
+        msg.textContent = 'Sent for review. It appears once a moderator approves it.';
+      }
+      form.reset();
+      onSaved(res.body.marker);
+    });
+
+    return form;
+  }
+
+  /** Commentary transcript: searchable, click to seek, doubles as the picker. */
+  function transcriptPanel(g) {
+    var search = el('input', { type: 'search', placeholder: 'Search the commentary…', 'aria-label': 'Search commentary' });
+    var status = el('p', { class: 'muted small', text: 'Loading commentary…' });
+    var list = el('ol', { class: 'cue-list' });
+    var wrap = el('section', { class: 'panel', id: 'transcript-panel' }, [
+      el('h2', { text: 'Commentary' }),
+      el('p', { class: 'muted small', text: 'Auto-generated captions from the broadcast. Names come through garbled; useful for finding a moment, not for facts.' }),
+      search, status, list,
+    ]);
+
+    var cues = [];
+    function draw() {
+      var q = search.value.trim().toLowerCase();
+      var shown = q ? cues.filter(function (c) { return c.text.toLowerCase().indexOf(q) !== -1; }) : cues;
+      list.innerHTML = '';
+      status.textContent = q
+        ? shown.length + ' of ' + cues.length + ' lines'
+        : cues.length + ' lines';
+      shown.slice(0, 400).forEach(function (c) {
+        var btn = el('button', { type: 'button', class: 'cue' }, [
+          el('span', { class: 'cue-time', text: secsToClock(c.start) }),
+          el('span', { class: 'cue-text', text: c.text }),
+        ]);
+        btn.addEventListener('click', function () {
+          if (markTarget) {
+            markTarget.set(markTarget.which === 'end' ? c.end : c.start);
+            status.textContent = 'Set ' + markTarget.which + ' to ' + secsToClock(markTarget.which === 'end' ? c.end : c.start) + '.';
+            markTarget = null;
+            return;
+          }
+          seekPlayer(g, c.start);
+        });
+        list.appendChild(el('li', {}, [btn]));
+      });
+      if (shown.length > 400) {
+        list.appendChild(el('li', { class: 'muted small', text: 'Showing the first 400 lines — narrow the search to see more.' }));
+      }
+    }
+    search.addEventListener('input', draw);
+
+    var tries = 0;
+    (function poll() {
+      api('transcript?game=' + encodeURIComponent(g.id)).then(function (res) {
+        if (!res) { wrap.remove(); return; }             // Pages mirror
+        var b = res.body || {};
+        if (b.status === 'ready') { cues = b.cues || []; draw(); return; }
+        if (b.status === 'unavailable') {
+          status.textContent = 'This broadcast has no caption track, so times have to be typed in by hand.';
+          search.remove();
+          return;
+        }
+        if (++tries > 60) { status.textContent = 'The commentary is taking unusually long to prepare.'; return; }
+        status.textContent = 'Preparing the commentary from the broadcast — this takes a minute the first time.';
+        setTimeout(poll, b.retryAfterMs || 4000);
+      });
+    })();
+
+    return wrap;
+  }
+
+
+  /* ---- account --------------------------------------------------------- */
+
+  function accountView() {
+    var wrap = el('div', {});
+    render([
+      el('a', { class: 'back-link', href: backTarget(), text: '← Back' }),
+      el('div', { class: 'page-head' }, [
+        el('h1', { text: 'Your account' }),
+        el('p', { text: 'Sign in to mark plays. New accounts can submit plays for review; trusted contributors publish directly.' }),
+      ]),
+      wrap,
+    ]);
+
+    NSNAuth.user().then(function (user) {
+      wrap.innerHTML = '';
+      if (API_ALIVE === false) {
+        wrap.appendChild(el('p', { class: 'note', text: 'This copy of the site is the read-only mirror, so there is nothing to sign in to here.' }));
+        return;
+      }
+      if (user) {
+        var roles = NSNAuth.roles(user);
+        wrap.appendChild(el('ul', { class: 'detail-facts' }, [
+          el('li', { html: '<b>Signed in as</b> ' + (user.email || user.name || 'you') }),
+          el('li', { html: '<b>Status</b> ' + (NSNAuth.canPublish(user)
+            ? 'plays you mark are published immediately'
+            : 'plays you mark go to a moderator for review') }),
+          roles.length ? el('li', { html: '<b>Roles</b> ' + roles.join(', ') }) : null,
+        ]));
+        var out = el('button', { type: 'button', class: 'btn secondary', text: 'Sign out' });
+        out.addEventListener('click', function () { NSNAuth.logout().then(function () { route(); }); });
+        wrap.appendChild(el('p', {}, [out]));
+        if (NSNAuth.is('moderator', user)) {
+          wrap.appendChild(el('p', {}, [el('a', { class: 'btn', href: '#/review', text: 'Review queue' })]));
+        }
+        return;
+      }
+      wrap.appendChild(authForm());
+    });
+  }
+
+  function authForm() {
+    var mode = 'login';
+    var email = el('input', { type: 'email', required: 'required', placeholder: 'you@example.com', 'aria-label': 'Email' });
+    var pass = el('input', { type: 'password', required: 'required', minlength: '8', placeholder: 'Password', 'aria-label': 'Password' });
+    var name = el('input', { type: 'text', placeholder: 'Display name (optional)', 'aria-label': 'Display name' });
+    var msg = el('p', { class: 'small' });
+    var submit = el('button', { type: 'submit', class: 'btn', text: 'Sign in' });
+    var toggle = el('button', { type: 'button', class: 'linkish', text: 'Create an account instead' });
+    var forgot = el('button', { type: 'button', class: 'linkish', text: 'Forgot password?' });
+
+    name.style.display = 'none';
+    toggle.addEventListener('click', function () {
+      mode = mode === 'login' ? 'signup' : 'login';
+      submit.textContent = mode === 'login' ? 'Sign in' : 'Create account';
+      toggle.textContent = mode === 'login' ? 'Create an account instead' : 'I already have an account';
+      name.style.display = mode === 'signup' ? '' : 'none';
+      msg.textContent = '';
+    });
+
+    forgot.addEventListener('click', async function () {
+      if (!email.value) { msg.textContent = 'Enter your email address first.'; return; }
+      try {
+        await NSNAuth.recover(email.value);
+        msg.textContent = 'If that address has an account, a reset link is on its way.';
+      } catch (err) { msg.textContent = err.message; }
+    });
+
+    var form = el('form', { class: 'mark-form' }, [
+      el('div', { class: 'time-row' }, [el('label', { class: 'time-label', text: 'Email' }), email]),
+      el('div', { class: 'time-row' }, [el('label', { class: 'time-label', text: 'Password' }), pass]),
+      el('div', { class: 'time-row' }, [el('label', { class: 'time-label', text: 'Name' }), name]),
+      el('div', { class: 'time-row' }, [submit, toggle, forgot]),
+      msg,
+    ]);
+
+    form.addEventListener('submit', async function (ev) {
+      ev.preventDefault();
+      submit.disabled = true;
+      msg.textContent = 'Working…';
+      try {
+        if (mode === 'login') {
+          await NSNAuth.login(email.value, pass.value);
+          route();
+        } else {
+          var user = await NSNAuth.signup(email.value, pass.value, name.value);
+          msg.textContent = user
+            ? 'Account created — you are signed in.'
+            : 'Account created. Check your email for the confirmation link before signing in.';
+          if (user) route();
+        }
+      } catch (err) {
+        msg.textContent = err && err.message ? err.message : 'That did not work.';
+      } finally {
+        submit.disabled = false;
+      }
+    });
+
+    return form;
+  }
+
+  /* ---- moderation ------------------------------------------------------ */
+
+  function reviewView() {
+    var body = el('div', {});
+    render([
+      el('a', { class: 'back-link', href: '#/account', text: '← Account' }),
+      el('div', { class: 'page-head' }, [
+        el('h1', { text: 'Review queue' }),
+        el('p', { text: 'Plays submitted by people who cannot publish directly.' }),
+      ]),
+      body,
+    ]);
+
+    NSNAuth.user().then(async function (user) {
+      if (!user || !NSNAuth.is('moderator', user)) {
+        body.appendChild(el('p', { class: 'note', text: 'This page is for moderators.' }));
+        return;
+      }
+      body.textContent = 'Loading…';
+      var res = await api('review/queue');
+      body.innerHTML = '';
+      if (!res || !res.ok) {
+        body.appendChild(el('p', { class: 'note', text: (res && res.body && res.body.error) || 'Could not load the queue.' }));
+        return;
+      }
+      var markers = res.body.markers || [];
+      if (!markers.length) {
+        body.appendChild(el('p', { class: 'empty', text: 'Nothing waiting for review.' }));
+      }
+      var list = el('ul', { class: 'play-list' });
+      markers.forEach(function (m) { list.appendChild(reviewRow(m)); });
+      body.appendChild(list);
+      body.appendChild(el('p', {}, [el('a', { class: 'btn secondary', href: '#/contributors', text: 'Manage contributors' })]));
+    });
+  }
+
+  function reviewRow(m) {
+    var game = data.games.filter(function (x) { return x.id === m.gameId; })[0];
+    var msg = el('span', { class: 'play-meta' });
+    var li = el('li', {});
+
+    function act(action) {
+      return async function () {
+        msg.textContent = '…';
+        var res = await api('review', {
+          method: 'POST',
+          body: JSON.stringify({ markerId: m.id, submittedBy: m.createdBy, action: action }),
+        });
+        if (!res || !res.ok) { msg.textContent = (res && res.body && res.body.error) || 'failed'; return; }
+        li.classList.add('done');
+        msg.textContent = res.body.status;
+      };
+    }
+    var ok = el('button', { type: 'button', class: 'chip', text: 'Approve' });
+    var no = el('button', { type: 'button', class: 'chip', text: 'Reject' });
+    ok.addEventListener('click', act('approve'));
+    no.addEventListener('click', act('reject'));
+
+    li.appendChild(el('div', { class: 'review-row' }, [
+      el('span', { class: 'play-label', text: m.label }),
+      el('span', { class: 'play-meta', text:
+        (game ? matchupText(game) : 'game ' + m.gameId) + ' · ' +
+        secsToClock(m.startSec) + '–' + secsToClock(m.endSec) + ' · by ' + (m.createdByName || 'someone') }),
+      m.note ? el('span', { class: 'play-meta', text: '“' + m.note + '”' }) : null,
+      el('span', { class: 'review-actions' }, [
+        game ? el('a', { class: 'chip', href: '#/game/' + m.gameId, text: 'Open game' }) : null,
+        ok, no, msg,
+      ]),
+    ]));
+    return li;
+  }
+
+  function contributorsView() {
+    var body = el('div', {});
+    render([
+      el('a', { class: 'back-link', href: '#/review', text: '← Review queue' }),
+      el('div', { class: 'page-head' }, [
+        el('h1', { text: 'Contributors' }),
+        el('p', { text: 'Contributors publish plays without review. Role changes take effect the next time that person signs in.' }),
+      ]),
+      body,
+    ]);
+
+    NSNAuth.user().then(async function (user) {
+      if (!user || !NSNAuth.is('moderator', user)) {
+        body.appendChild(el('p', { class: 'note', text: 'This page is for moderators.' }));
+        return;
+      }
+      body.textContent = 'Loading…';
+      var res = await api('review/users');
+      body.innerHTML = '';
+      if (!res || !res.ok) {
+        body.appendChild(el('p', { class: 'note', text: (res && res.body && res.body.error) || 'Could not load the user list.' }));
+        return;
+      }
+      var list = el('ul', { class: 'play-list' });
+      (res.body.users || []).forEach(function (u) { list.appendChild(contributorRow(u)); });
+      body.appendChild(list);
+    });
+  }
+
+  function contributorRow(u) {
+    var msg = el('span', { class: 'play-meta' });
+    var isContrib = (u.roles || []).indexOf('contributor') !== -1;
+    var btn = el('button', { type: 'button', class: 'chip', text: isContrib ? 'Remove contributor' : 'Make contributor' });
+    btn.addEventListener('click', async function () {
+      btn.disabled = true;
+      msg.textContent = '…';
+      var res = await api('review/users', {
+        method: 'POST',
+        body: JSON.stringify({ userId: u.id, role: 'contributor', grant: !isContrib }),
+      });
+      btn.disabled = false;
+      if (!res || !res.ok) { msg.textContent = (res && res.body && res.body.error) || 'failed'; return; }
+      isContrib = !isContrib;
+      btn.textContent = isContrib ? 'Remove contributor' : 'Make contributor';
+      msg.textContent = 'saved — applies on their next sign-in';
+    });
+    return el('li', {}, [
+      el('div', { class: 'review-row' }, [
+        el('span', { class: 'play-label', text: u.email || u.name || u.id }),
+        el('span', { class: 'play-meta', text: (u.roles || []).join(', ') || 'no roles' }),
+        el('span', { class: 'review-actions' }, [btn, msg]),
+      ]),
+    ]);
   }
 
   function notFound(msg) {
@@ -347,6 +854,16 @@
     });
   }
 
+  /** Header link doubles as the sign-in state indicator. */
+  function refreshAccountLink() {
+    var link = document.getElementById('account-link');
+    if (!link) return;
+    NSNAuth.user().then(function (user) {
+      if (API_ALIVE === false) { link.style.display = 'none'; return; }
+      link.textContent = user ? (user.name || (user.email || '').split('@')[0] || 'Account') : 'Sign in';
+    });
+  }
+
   function setTab(name) {
     document.querySelectorAll('.tabs a').forEach(function (a) {
       if (a.dataset.tab === name) a.setAttribute('aria-current', 'page');
@@ -368,11 +885,21 @@
     } else if (parts[0] === 'game' && parts[1]) {
       setTab(null);
       gameView(decodeURIComponent(parts[1]));
+    } else if (parts[0] === 'account') {
+      setTab(null);
+      accountView();
+    } else if (parts[0] === 'review') {
+      setTab(null);
+      reviewView();
+    } else if (parts[0] === 'contributors') {
+      setTab(null);
+      contributorsView();
     } else {
       lastListRoute = '#/timeline';
       setTab('timeline');
       timelineView();
     }
+    refreshAccountLink();
     window.scrollTo(0, 0);
   }
 

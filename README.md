@@ -47,6 +47,30 @@ for anyone changing this code:
 None of this substitutes for asking. If this site ever gets real traffic, the
 right move is to contact NSN directly.
 
+## Marking plays
+
+Signed-in visitors can mark when a play starts and ends, and those marks are shared
+with everyone. Submissions from new accounts go to a review queue; users granted the
+`contributor` role publish directly. Moderators approve markers and hand out that role.
+
+Marks are anchored to the **commentary transcript** rather than to the player's
+position, because NSN's embed is cross-origin and sealed — we can seek *into* it with
+`?t=<seconds>` but can never read where it is (`contentWindow.player` throws
+`SecurityError`, and the player exposes no postMessage API). So the flow is: pick the
+caption line where the play starts, pick the one where it ends, hit *check* to seek the
+embed there, and nudge by ±1/±5s. Typed `m:ss` entry is there too, and is the only
+option on the handful of pre-2022 broadcasts that have no captions.
+
+The transcript is assembled server-side from the broadcast's caption track (VMAP →
+master manifest → subtitle playlist → ~757 WebVTT segments) and cached. It is speech
+recognition, so proper nouns come through mangled — "Missiskoy" for Missisquoi. It is
+for finding a moment, not for reading facts out of.
+
+This is why we do **not** run our own player, which would allow one-click marking:
+NSN's ad tag is `iu=/29795821/nsn` declaring `fan.hudl.com`, and issuing that from
+another domain would misdeclare their inventory to Google Ad Manager against their own
+account.
+
 ## How it works
 
 NSN runs on WordPress and renders its broadcast lists client-side from
@@ -57,15 +81,34 @@ football broadcasts, parses the two schools out of each title, and writes
 one file — no framework, no build step, no server.
 
 ```
-docs/               the site (publish this directory)
+docs/                   the static site (published by both hosts)
   index.html
-  assets/app.js     hash routing + rendering
+  assets/app.js         hash routing + rendering
+  assets/auth.js        Netlify Identity wrapper
   assets/styles.css
-  data/games.json   generated — do not hand-edit
+  data/games.json       generated — do not hand-edit
+netlify/
+  functions/            the API: markers, review queue, roles, transcripts
+  lib/                  the logic those functions share, unit-tested
 data/
-  raw_broadcasts.json  cached API response, so parsing can be reworked offline
+  raw_broadcasts.json   cached API response, so parsing can be reworked offline
 scripts/fetch_games.py
+test/                   node --test over netlify/lib
 ```
+
+### Hosting
+
+The same `docs/` is served from two places:
+
+- **Netlify** runs the full app — `netlify.toml` publishes `docs/` and deploys the
+  functions. Netlify Identity must be enabled on the site for sign-in to work.
+- **GitHub Pages** is a read-only mirror. It cannot run functions, so `app.js` probes
+  `/api/markers`; where that is missing, the play and commentary panels remove
+  themselves and the sign-in link hides. The archive itself works identically.
+
+Blobs and background functions are used for storage and transcript assembly. Netlify's
+Blobs docs say Pro and above while their pricing pages put Functions, Database and Blobs
+in the Free tier's credits — worth checking against the account before relying on it.
 
 ## Running it
 
@@ -73,9 +116,14 @@ Any static file server works; the site fetches `data/games.json`, so opening
 `index.html` straight off the filesystem will not work.
 
 ```sh
+netlify dev            # full app: functions, Identity, Blobs
+# or, archive only, with the marker features hidden:
 python3 -m http.server 8000 --directory docs
-# then open http://localhost:8000
 ```
+
+`npm test` runs the unit tests over `netlify/lib` (transcript parsing, marker
+validation, role rules, and the compare-and-swap that stops concurrent submissions
+overwriting each other); `python3 scripts/test_parse.py` covers the scraper.
 
 ## Refreshing the data
 

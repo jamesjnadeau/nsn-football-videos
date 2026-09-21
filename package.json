@@ -1,0 +1,16 @@
+{
+  "name": "nsn-football-videos",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Browsable index of NSN's Vermont high school football broadcasts",
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "dev": "netlify dev"
+  },
+  "dependencies": {
+    "@netlify/blobs": "^11.1.0",
+    "@netlify/functions": "^6.0.0",
+    "@netlify/identity": "^2.0.0"
+  }
+}
