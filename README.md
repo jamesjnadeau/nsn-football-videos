@@ -62,8 +62,16 @@ runs it weekly during the season and commits the result.
 
 NSN's titles are free text, so `fetch_games.py` normalises them:
 
+**NSN names the visiting team first** — `A vs. B` means A travelled to B. That
+is not obvious and getting it backwards is silent, so it is pinned down two
+ways: three September 2026 games check out against MaxPreps schedules, and
+across all 192 seeded playoff titles in the archive the worse seed is listed
+first without a single exception — which only holds if the first team is the
+visitor, since VPA seeding gives the better seed the home field.
+
 | In the title | Handled as |
 | --- | --- |
+| `Spaulding vs. Missisquoi` | Spaulding away, Missisquoi home |
 | `#3 Colchester vs #2 Lyndon` | seeds stripped, two schools |
 | `... - VPA DIV II Semifinal` | a `round` field, not part of the school name |
 | `St. Johnsbury vs Colchester 2` | `part: 2` — the second recording of one game |
@@ -76,7 +84,8 @@ schools.
 
 When NSN starts using a new format, add a case to `SCHOOL_ALIASES` or
 `ROUND_SUFFIX` and re-run with `--from-cache` to check the result without
-re-fetching.
+re-fetching. `python3 scripts/test_parse.py` covers these rules, including the
+home/away order, and runs in CI before every scheduled refresh.
 
 ## Publishing
 

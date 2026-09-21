@@ -20,6 +20,9 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Check the title parsing
+        run: python3 scripts/test_parse.py
+
       - name: Fetch broadcasts from NSN
         run: python3 scripts/fetch_games.py
 

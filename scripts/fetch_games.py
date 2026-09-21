@@ -37,8 +37,17 @@ CACHE_PATH = REPO_ROOT / "data" / "raw_broadcasts.json"
 # Broadcasts that live in the football section but aren't games.
 NOT_A_GAME = re.compile(r"inside the game with eric berry|\bpodcast\b|\bpress conference\b", re.I)
 
-# "Home vs. Away", with the separators NSN staff have used over the years.
-# Longest/most specific first so " vs. " wins over " v. ".
+# NSN writes "Away vs. Home" -- the visiting team is named first.
+#
+# Verified two ways. Three Sept 2026 games check out against MaxPreps schedules
+# (Mt. Abraham hosted BFA/Lamoille, Spaulding travelled to Missisquoi, Hartford
+# travelled to Burr & Burton). And across every seeded playoff title in the
+# archive -- 192 of them, all sports, 2018-2026 -- the worse seed is listed
+# first without a single exception, which only holds if the first team is the
+# visitor, since VPA seeding gives the better seed the home field.
+#
+# Separators longest/most specific first so " vs. " wins over " v. ". "A @ B"
+# and "A at B" already mean the same thing, so they need no special case.
 SEPARATOR = re.compile(r"\s+(?:vs\.?|v\.?|@|at)\s+", re.I)
 
 # A trailing " - VPA DIV II Semifinal" style tag describes the game, not the school.
@@ -165,14 +174,14 @@ def parse_title(title):
         part = int(m.group(1))
         text = text[: m.start()]
 
-    home = away = None
+    away = home = None
     parts = SEPARATOR.split(text, maxsplit=1)
     if len(parts) == 2:
-        h, a = clean_school(parts[0]), clean_school(parts[1])
-        if h and a:
-            home, away = h, a
+        first, second = clean_school(parts[0]), clean_school(parts[1])
+        if first and second:
+            away, home = first, second
 
-    return home, away, round_name, part
+    return away, home, round_name, part
 
 
 def slugify(name):
@@ -195,8 +204,8 @@ def normalize(raw):
     except (TypeError, ValueError):
         return None
 
-    home, away, round_name, part = parse_title(title)
-    teams = [t for t in (home, away) if t]
+    away, home, round_name, part = parse_title(title)
+    teams = [t for t in (away, home) if t]   # kept in the title's own order
 
     rec = {
         "id": str(raw.get("id")),
