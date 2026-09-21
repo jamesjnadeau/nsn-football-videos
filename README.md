@@ -83,13 +83,22 @@ Signed-in visitors can mark when a play starts and ends, and those marks are sha
 with everyone. Submissions from new accounts go to a review queue; users granted the
 `contributor` role publish directly. Moderators approve markers and hand out that role.
 
-Marks are anchored to the **commentary transcript** rather than to the player's
-position, because NSN's embed is cross-origin and sealed — we can seek *into* it with
-`?t=<seconds>` but can never read where it is (`contentWindow.player` throws
-`SecurityError`, and the player exposes no postMessage API). So the flow is: pick the
-caption line where the play starts, pick the one where it ends, hit *check* to seek the
-embed there, and nudge by ±1/±5s. Typed `m:ss` entry is there too, and is the only
-option on the handful of pre-2022 broadcasts that have no captions.
+There are three ways to set a time, and the form starts with the play's number
+already in the Label field — one past the highest number used on that broadcast, so a
+run of plays is two times and *Save*. Typing over it is expected; a play named by hand
+consumes no number.
+
+- **from video** reads the marking player's clock exactly. Signed-in only, since it
+  needs the player described above; it is simply absent when NSN's embed is what is on
+  screen, rather than present and wrong.
+- **from transcript** picks the caption line where the play starts or ends. This was
+  the original route, built when the embed was the only player and marks had to be
+  anchored to something readable.
+- **Typed `m:ss`**, the fallback, and the only option on the handful of pre-2022
+  broadcasts with no captions.
+
+*check* seeks the player to whatever is in the field, so a time can be confirmed
+before saving.
 
 The transcript is assembled server-side from the broadcast's caption track (VMAP →
 master manifest → subtitle playlist → ~757 WebVTT segments) and cached. It is speech

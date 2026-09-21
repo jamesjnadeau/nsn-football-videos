@@ -644,11 +644,6 @@
     var noteIn = el('input', { type: 'text', maxlength: '280', placeholder: 'Optional note', 'aria-label': 'Note' });
     var msg = el('p', { class: 'small' });
 
-    function nudge(input, delta) {
-      var cur = clockToSecs(input.value);
-      input.value = secsToClock(Math.max(0, (cur === null ? 0 : cur) + delta));
-    }
-
     function timeRow(labelText, input, which) {
       var row = el('div', { class: 'time-row' }, [
         el('label', { class: 'time-label', text: labelText }), input,
@@ -673,12 +668,6 @@
         if (panel) panel.scrollIntoView({ block: 'start', behavior: 'smooth' });
       });
       row.appendChild(pick);
-
-      [['-5', -5], ['-1', -1], ['+1', 1], ['+5', 5]].forEach(function (n) {
-        var b = el('button', { type: 'button', class: 'chip', text: n[0] });
-        b.addEventListener('click', function () { nudge(input, n[1]); });
-        row.appendChild(b);
-      });
 
       var check = el('button', { type: 'button', class: 'chip', text: '▶ check' });
       check.addEventListener('click', function () {
