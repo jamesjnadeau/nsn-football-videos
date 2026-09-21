@@ -1,7 +1,8 @@
 /* /api/markers -- the play markers for one broadcast.
  *
- *   GET  ?game=<id>   approved markers; public, unauthenticated, cached briefly
- *   POST              submit a marker; requires a signed-in user
+ *   GET     ?game=<id>              approved markers; public, cached briefly
+ *   POST                             submit a marker; requires a signed-in user
+ *   DELETE  ?game=<id>&id=<marker>   take one down; its author or a moderator
  *
  * Both live in one function on purpose. Netlify routes by path, and a second
  * function declaring this same path would simply never run -- a `method` narrows
@@ -12,6 +13,7 @@ import { getUser } from '@netlify/identity';
 import {
   validateMarker, canPublishDirectly, newMarker, appendApproved,
   approvedKey, pendingKey, pendingPrefix, isDuplicate, MAX_PENDING_PER_USER,
+  canRemove, removeApproved,
 } from '../lib/markers.mjs';
 import { json, problem, readJson, openStore } from '../lib/http.mjs';
 
@@ -72,10 +74,36 @@ async function submitMarker(req) {
   return json({ status: 'pending', marker }, 202);
 }
 
+/** Take a published marker down. Idempotent: deleting one that has already
+ *  gone reports success, because that is the state the caller asked for. */
+async function deleteMarker(req) {
+  const params = new URL(req.url).searchParams;
+  const gameId = params.get('game') || '';
+  const markerId = params.get('id') || '';
+  if (!/^\d{1,20}$/.test(gameId)) return problem('game must be a broadcast id');
+  if (!markerId) return problem('id is required');
+
+  const user = await getUser();
+  if (!user) return problem('sign in to remove a play', 401);
+
+  const store = await openStore('markers');
+  const existing = (await store.get(approvedKey(gameId), { type: 'json' }))?.markers ?? [];
+  const marker = existing.find((m) => m.id === markerId);
+  if (!marker) return json({ status: 'gone' }, 200);
+
+  if (!canRemove(user, marker)) {
+    return problem('only the person who marked this play, or a moderator, can remove it', 403);
+  }
+
+  const { removed } = await removeApproved(store, gameId, markerId);
+  return json({ status: removed ? 'removed' : 'gone', id: markerId }, 200);
+}
+
 export default async (req) => {
   if (req.method === 'GET') return listMarkers(req);
   if (req.method === 'POST') return submitMarker(req);
-  return problem('use GET or POST', 405);
+  if (req.method === 'DELETE') return deleteMarker(req);
+  return problem('use GET, POST or DELETE', 405);
 };
 
 export const config = { path: '/api/markers' };

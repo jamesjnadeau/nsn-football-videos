@@ -132,3 +132,31 @@ export async function appendApproved(store, gameId, marker, { attempts = 5 } = {
   }
   throw new Error('could not save marker after repeated write conflicts');
 }
+
+/** Who may take a published marker down: whoever put it up, or a moderator. */
+export function canRemove(user, marker) {
+  if (!user || !marker) return false;
+  return isModerator(user) || marker.createdBy === user.id;
+}
+
+/**
+ * Remove one marker from a game's approved list, under the same
+ * compare-and-swap as appendApproved so a concurrent add is not clobbered.
+ * Returns { removed: false } when it was already gone -- deleting twice is not
+ * an error, it is the outcome the caller wanted.
+ */
+export async function removeApproved(store, gameId, markerId, { attempts = 5 } = {}) {
+  for (let i = 0; i < attempts; i++) {
+    const key = approvedKey(gameId);
+    const current = await store.getWithMetadata(key, { type: 'json', consistency: 'strong' });
+    const markers = current?.data?.markers ?? [];
+
+    const marker = markers.find((m) => m.id === markerId);
+    if (!marker) return { removed: false, marker: null, markers };
+
+    const next = { markers: markers.filter((m) => m.id !== markerId) };
+    const { modified } = await store.setJSON(key, next, { onlyIfMatch: current.etag });
+    if (modified) return { removed: true, marker, markers: next.markers };
+  }
+  throw new Error('could not remove marker after repeated write conflicts');
+}

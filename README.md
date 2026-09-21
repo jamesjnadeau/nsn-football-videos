@@ -33,11 +33,40 @@ checked against their endpoints:
 | Sponsor thumbnails | **Preserved.** The card images *are* sponsor creative. |
 | Display banner ads | **Lost.** `nsnsports.net` runs Google Ad Manager slots that only render on their own pages. |
 
-So the gap is display advertising and page views. Rules that follow from that,
-for anyone changing this code:
+So for an ordinary visitor the gap is display advertising and page views.
 
-- **Embed the player, never rehost.** No copying video, no `download_url` — a
-  direct file link skips the player and every ad in it.
+### The one exception: the marking player
+
+Marking a play needs a readable `currentTime`, and NSN's embed cannot give one —
+it is cross-origin and sealed. There is no parent-facing `postMessage` API in
+either the embed page or the player bundle; the only message listeners in it are
+an hls.js worker and a `setImmediate` polyfill. We can seek into it with `?t=`,
+and that is all.
+
+So **signed-in users only** get a plain `<video>` fed by hls.js straight from
+NSN's CloudFront CDN, which serves `Access-Control-Allow-Origin: *` on the
+variant playlists and segments. It carries no ads. Anonymous visitors — nearly
+everyone — still get NSN's own embed with NSN's ads.
+
+This is a deliberate trade the site owner made with the cost in front of them,
+and it is kept as narrow as it can be: sign-in is invite-only, `/api/stream`
+rejects anonymous requests so it cannot become a public stream endpoint, and
+"Watch on NSN Sports" stays on the page either way.
+
+What was **not** done, and must not be: reusing NSN's ad tag from this domain.
+Their tag is `iu=/29795821/nsn` with `description_url=https://fan.hudl.com`.
+Sending that from here would misdeclare the impression to Google Ad Manager —
+the pattern `ads.txt` exists to catch — and could get NSN's whole ad account
+flagged, not just these views. An own player with ads is only legitimate if NSN
+authorises this domain themselves.
+
+### Rules for anyone changing this code
+
+- **Never rehost.** The marking player streams from NSN's own CDN and caches
+  nothing; no copying video, no `download_url`.
+- **Never send NSN's ad tag from this domain.** See above.
+- **Keep the marking player behind sign-in.** It is the tool, not the way the
+  public watches.
 - **Keep the outbound links.** Every card and game page links to NSN's page for
   that broadcast, which is where their display ads run.
 - **Keep the referrer.** Outbound links use `rel="noopener"` and must never add
@@ -45,7 +74,8 @@ for anyone changing this code:
 - **Keep the sponsor thumbnails** rather than substituting generic artwork.
 
 None of this substitutes for asking. If this site ever gets real traffic, the
-right move is to contact NSN directly.
+right move is to contact NSN directly — and that is also the route to a player
+that can legitimately carry their ads.
 
 ## Marking plays
 
@@ -88,7 +118,7 @@ docs/                   the static site (published by both hosts)
   assets/styles.css
   data/games.json       generated — do not hand-edit
 netlify/
-  functions/            the API: markers, review queue, roles, transcripts
+  functions/            the API: markers, stream, review queue, roles, transcripts
                         one path per function -- Netlify routes by path, so two
                         functions sharing one means the second never runs
   lib/                  the logic those functions share, unit-tested

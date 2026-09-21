@@ -329,6 +329,23 @@
       teamLinks.appendChild(el('a', { href: '#/school/' + slugify(t), text: 'All ' + t + ' games' }));
     });
 
+    // Left column: the player and everything about the broadcast itself.
+    var playerSlot = el('div', { class: 'player-slot' });
+    var primary = el('div', { class: 'game-primary' }, [
+      playerSlot,
+      facts,
+      g.requiresLogin
+        ? el('p', { class: 'note', text: 'NSN requires a subscription or access pass to watch this broadcast.' })
+        : null,
+      el('p', {}, [nsnLink(g, 'Watch on NSN Sports ↗', 'btn')]),
+      teamLinks,
+    ]);
+
+    // Right column: marked plays, for signed-in people only. Stays empty (and
+    // the grid stays one column) until we know there is something to put in it.
+    var side = el('div', { class: 'game-side' });
+    var grid = el('div', { class: 'game-grid' }, [primary, side]);
+
     var kids = [
       el('a', { class: 'back-link', href: backTarget(), text: '← Back' }),
       el('div', { class: 'page-head' }, [
@@ -336,60 +353,160 @@
         el('p', { text: g.title })
       ])
     ];
-
     if (isUpcoming(g)) {
       kids.push(el('p', { class: 'note', text: 'This game has not aired yet. The player opens once NSN starts the broadcast.' }));
     }
-    playerFrame = null;
-    if (g.embedUrl) {
-      playerFrame = el('iframe', {
-        class: 'player', src: g.embedUrl, title: matchupText(g),
-        allow: 'fullscreen', allowfullscreen: 'true', loading: 'lazy', referrerpolicy: 'no-referrer-when-downgrade'
-      });
-      kids.push(playerFrame);
-    }
-    kids.push(facts);
-    if (g.requiresLogin) {
-      kids.push(el('p', { class: 'note', text: 'NSN requires a subscription or access pass to watch this broadcast.' }));
-    }
-    kids.push(el('p', {}, [nsnLink(g, 'Watch on NSN Sports ↗', 'btn')]));
-    kids.push(teamLinks);
+    kids.push(grid);
 
-    // Both panels remove themselves when there is no backend behind them.
     markTarget = null;
-    if (!isUpcoming(g)) {
-      kids.push(playsPanel(g));
-      kids.push(transcriptPanel(g));
-    }
+    player = null;
+    if (!isUpcoming(g)) kids.push(transcriptPanel(g));
 
     render(kids);
+
+    // The embed goes up straight away so nobody waits on an auth round-trip;
+    // a signed-in marker is then upgraded to the readable player in place.
+    attachPlayer(g, playerSlot, side);
   }
 
 
-  /* ---- play markers + transcript ---------------------------------------
-   * The NSN embed is cross-origin and sealed: we can seek into it with ?t= but
-   * we can never read where it is. So marking anchors to transcript lines (and
-   * to typed timestamps for the older broadcasts with no captions) rather than
-   * to the player's position. */
+  /* ---- the player -------------------------------------------------------
+   *
+   * Two of them, and which you get depends on whether you are signed in.
+   *
+   * Anonymous visitors -- nearly everyone -- get NSN's own embed, so NSN's
+   * pre-roll and mid-roll ads run and NSN gets paid for the view. That embed is
+   * cross-origin and sealed: we can seek into it with ?t=, but we can never
+   * read where it is.
+   *
+   * Signed-in markers get a plain <video> fed by hls.js from NSN's CloudFront
+   * CDN, because marking a play needs a readable currentTime and the embed
+   * cannot give one. It carries no ads. That is a deliberate trade the site
+   * owner made, kept as narrow as possible: it is the marking tool, not the
+   * way the public watches. The "Watch on NSN Sports" link stays on the page
+   * either way.
+   */
 
-  var playerFrame = null;   // the <iframe> currently on screen
+  var HLS_URL = 'https://cdn.jsdelivr.net/npm/hls.js@1/dist/hls.min.js';
+  var player = null;    // { seek(sec), now() -> seconds|null }
+  var hlsPromise = null;
 
-  function seekPlayer(g, sec) {
-    if (!playerFrame || !g.embedUrl) return;
-    var base = g.embedUrl.split('#')[0].replace(/[?&]t=\d+/, '');
-    var join = base.indexOf('?') === -1 ? '?' : '&';
-    playerFrame.src = base + join + 't=' + Math.max(0, Math.round(sec));
-    playerFrame.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  function loadHls() {
+    if (!hlsPromise) {
+      hlsPromise = new Promise(function (resolve) {
+        var s = document.createElement('script');
+        s.src = HLS_URL;
+        s.onload = function () { resolve(window.Hls || null); };
+        s.onerror = function () { resolve(null); };
+        document.head.appendChild(s);
+      });
+    }
+    return hlsPromise;
   }
 
-  /** Panel listing approved markers for this broadcast. */
-  function playsPanel(g) {
+  /** NSN's embed: seekable, never readable. */
+  function embedPlayer(g, slot) {
+    if (!g.embedUrl) return null;
+    var frame = el('iframe', {
+      class: 'player', src: g.embedUrl, title: matchupText(g),
+      allow: 'fullscreen', allowfullscreen: 'true', loading: 'lazy',
+      referrerpolicy: 'no-referrer-when-downgrade'
+    });
+    slot.appendChild(frame);
+    return {
+      node: frame,
+      readable: false,
+      now: function () { return null; },
+      seek: function (sec) {
+        var base = g.embedUrl.split('#')[0].replace(/[?&]t=\d+/, '');
+        var join = base.indexOf('?') === -1 ? '?' : '&';
+        frame.src = base + join + 't=' + Math.max(0, Math.round(sec));
+        frame.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      },
+    };
+  }
+
+  /** Our own player, over the manifest the server resolved for us. */
+  async function streamPlayer(g, slot, master) {
+    var video = el('video', {
+      class: 'player', controls: 'controls', playsinline: 'playsinline',
+      preload: 'metadata', title: matchupText(g),
+    });
+
+    // hls.js wants a URL. The manifest is already absolute throughout, so a
+    // blob of it works and keeps quality switching and the caption track.
+    var blobUrl = URL.createObjectURL(new Blob([master], { type: 'application/vnd.apple.mpegurl' }));
+
+    var native = video.canPlayType('application/vnd.apple.mpegurl');
+    if (native) {
+      video.src = blobUrl;
+    } else {
+      var Hls = await loadHls();
+      if (!Hls || !Hls.isSupported()) { URL.revokeObjectURL(blobUrl); return null; }
+      var hls = new Hls({ enableWorker: true });
+      hls.loadSource(blobUrl);
+      hls.attachMedia(video);
+    }
+
+    slot.appendChild(video);
+    slot.appendChild(el('p', { class: 'muted small player-note' }, [
+      document.createTextNode('Marking player — no ads. '),
+      nsnLink(g, 'Watch on NSN ↗', 'linkish'),
+      document.createTextNode(' to support the people covering these games.'),
+    ]));
+
+    return {
+      node: video,
+      readable: true,
+      now: function () {
+        return Number.isFinite(video.currentTime) ? video.currentTime : null;
+      },
+      seek: function (sec) {
+        try { video.currentTime = Math.max(0, sec); } catch (_) { /* not ready yet */ }
+        video.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      },
+    };
+  }
+
+  /** Put a player in the slot, and the plays panel beside it when signed in. */
+  async function attachPlayer(g, slot, side) {
+    player = embedPlayer(g, slot);
+
+    var user = await NSNAuth.user();
+    if (!user || isUpcoming(g)) return;
+
+    // Plays are part of the marking tool, so they appear with it.
+    side.appendChild(playsPanel(g, user));
+    side.closest('.game-grid').classList.add('has-side');
+
+    var res = await api('stream?game=' + encodeURIComponent(g.id));
+    if (!res || !res.ok || !res.body || !res.body.master) return;   // keep the embed
+
+    slot.innerHTML = '';
+    var streamed = await streamPlayer(g, slot, res.body.master);
+    // No hls.js and no native HLS: put NSN's embed back rather than nothing.
+    player = streamed || (slot.innerHTML = '', embedPlayer(g, slot));
+  }
+
+  function seekPlayer(g, sec) { if (player) player.seek(sec); }
+
+
+  /* ---- marked plays ----------------------------------------------------- */
+
+  /** Panel listing approved markers for this broadcast. Signed-in only. */
+  function playsPanel(g, user) {
     var list = el('ul', { class: 'play-list' });
     var status = el('p', { class: 'muted small' });
     var actions = el('div', { class: 'play-actions' });
     var wrap = el('section', { class: 'panel' }, [
       el('h2', { text: 'Marked plays' }), status, list, actions
     ]);
+
+    function refresh() {
+      api('markers?game=' + encodeURIComponent(g.id)).then(function (r) {
+        if (r && r.body) draw(r.body.markers || []);
+      });
+    }
 
     function draw(markers) {
       list.innerHTML = '';
@@ -399,51 +516,85 @@
       }
       status.textContent = markers.length + ' play' + (markers.length === 1 ? '' : 's') + ' marked';
       markers.forEach(function (m) {
-        var btn = el('button', { type: 'button', class: 'play-row' }, [
-          el('span', { class: 'play-time', text: secsToClock(m.startSec) }),
-          el('span', { class: 'play-label', text: m.label }),
-          el('span', { class: 'play-meta', text: Math.round(m.endSec - m.startSec) + 's · ' + (m.createdByName || 'someone') })
-        ]);
-        btn.addEventListener('click', function () { seekPlayer(g, m.startSec); });
-        list.appendChild(el('li', {}, [btn]));
+        list.appendChild(el('li', {}, [playRow(g, m, user, refresh)]));
       });
     }
 
     api('markers?game=' + encodeURIComponent(g.id)).then(function (res) {
       if (!res) { wrap.remove(); return; }     // no backend: this is the Pages mirror
       draw((res.body && res.body.markers) || []);
-      buildMarkButton(g, actions, function (marker) {
-        // Published markers appear at once; queued ones must not, or the
-        // submitter will think everyone can see them.
-        if (marker.status === 'approved') {
-          api('markers?game=' + encodeURIComponent(g.id)).then(function (r) {
-            if (r && r.body) draw(r.body.markers || []);
-          });
-        }
+      var open = el('button', { type: 'button', class: 'btn secondary', text: '+ Mark a play' });
+      open.addEventListener('click', function () {
+        open.remove();
+        actions.appendChild(markForm(g, user, function (marker) {
+          // Published markers appear at once; queued ones must not, or the
+          // submitter will think everyone can see them.
+          if (marker.status === 'approved') refresh();
+        }));
       });
+      actions.appendChild(open);
     });
 
     return wrap;
   }
 
-  /** "Mark a play" button + form, shown only to signed-in users. */
-  function buildMarkButton(g, container, onSaved) {
-    NSNAuth.user().then(function (user) {
-      container.innerHTML = '';
-      if (!user) {
-        container.appendChild(el('p', { class: 'muted small' }, [
-          el('a', { href: '#/account', text: 'Sign in' }),
-          document.createTextNode(' to mark a play.')
-        ]));
-        return;
-      }
-      var open = el('button', { type: 'button', class: 'btn secondary', text: '+ Mark a play' });
-      open.addEventListener('click', function () {
-        open.remove();
-        container.appendChild(markForm(g, user, onSaved));
-      });
-      container.appendChild(open);
+  /** Whoever marked a play can take it down again; so can a moderator. */
+  function canRemovePlay(user, m) {
+    if (!user || !m) return false;
+    return NSNAuth.is('moderator', user) || m.createdBy === user.id;
+  }
+
+  function playRow(g, m, user, onRemoved) {
+    var go = el('button', { type: 'button', class: 'play-row' }, [
+      el('span', { class: 'play-time', text: secsToClock(m.startSec) }),
+      el('span', { class: 'play-label', text: m.label }),
+      el('span', { class: 'play-meta', text: Math.round(m.endSec - m.startSec) + 's · ' + (m.createdByName || 'someone') })
+    ]);
+    go.addEventListener('click', function () { seekPlayer(g, m.startSec); });
+
+    var row = el('div', { class: 'play-row-wrap' }, [go]);
+    if (!canRemovePlay(user, m)) return row;
+
+    // Removing is destructive and the rows are small, so it takes two presses:
+    // the second one is the confirmation, and it is easy to back out of.
+    var remove = el('button', {
+      type: 'button', class: 'chip danger', text: 'Remove',
+      'aria-label': 'Remove the play "' + m.label + '"',
     });
+    var confirm = el('span', { class: 'confirm' });
+    row.appendChild(remove);
+    row.appendChild(confirm);
+
+    remove.addEventListener('click', function () {
+      remove.style.display = 'none';
+      var yes = el('button', { type: 'button', class: 'chip danger', text: 'Yes, remove' });
+      var no = el('button', { type: 'button', class: 'chip', text: 'Keep' });
+      confirm.appendChild(el('span', { class: 'small', text: 'Remove this play?' }));
+      confirm.appendChild(yes);
+      confirm.appendChild(no);
+
+      no.addEventListener('click', function () {
+        confirm.innerHTML = '';
+        remove.style.display = '';
+      });
+
+      yes.addEventListener('click', async function () {
+        yes.disabled = no.disabled = true;
+        confirm.innerHTML = '';
+        confirm.appendChild(el('span', { class: 'small', text: 'Removing…' }));
+        var res = await api('markers?game=' + encodeURIComponent(g.id) + '&id=' + encodeURIComponent(m.id),
+          { method: 'DELETE' });
+        if (!res || !res.ok) {
+          confirm.innerHTML = '';
+          confirm.appendChild(el('span', { class: 'small', text: (res && res.body && res.body.error) || 'Could not remove that.' }));
+          remove.style.display = '';
+          return;
+        }
+        onRemoved();
+      });
+    });
+
+    return row;
   }
 
   var markTarget = null;   // {set: fn} while the form is capturing a transcript line
@@ -461,6 +612,21 @@
     }
 
     function timeRow(labelText, input, which) {
+      var row = el('div', { class: 'time-row' }, [
+        el('label', { class: 'time-label', text: labelText }), input,
+      ]);
+
+      // Only our own player can say where it is; NSN's embed cannot, so the
+      // button is simply absent rather than present and wrong.
+      var fromVideo = el('button', { type: 'button', class: 'chip primary', text: 'from video' });
+      fromVideo.addEventListener('click', function () {
+        var at = player && player.now();
+        if (at === null || at === undefined) { msg.textContent = 'The video has not started yet.'; return; }
+        input.value = secsToClock(at);
+        msg.textContent = 'Set ' + which + ' to ' + input.value + ' from the video.';
+      });
+      if (player && player.readable) row.appendChild(fromVideo);
+
       var pick = el('button', { type: 'button', class: 'chip', text: 'from transcript' });
       pick.addEventListener('click', function () {
         markTarget = { which: which, set: function (sec) { input.value = secsToClock(sec); } };
@@ -468,19 +634,19 @@
         var panel = document.getElementById('transcript-panel');
         if (panel) panel.scrollIntoView({ block: 'start', behavior: 'smooth' });
       });
+      row.appendChild(pick);
+
+      [['-5', -5], ['-1', -1], ['+1', 1], ['+5', 5]].forEach(function (n) {
+        var b = el('button', { type: 'button', class: 'chip', text: n[0] });
+        b.addEventListener('click', function () { nudge(input, n[1]); });
+        row.appendChild(b);
+      });
+
       var check = el('button', { type: 'button', class: 'chip', text: '▶ check' });
       check.addEventListener('click', function () {
         var sec = clockToSecs(input.value);
         if (sec === null) { msg.textContent = 'Enter a time like 12:34 first.'; return; }
         seekPlayer(g, sec);
-      });
-      var row = el('div', { class: 'time-row' }, [
-        el('label', { class: 'time-label', text: labelText }), input, pick,
-      ]);
-      [['-5', -5], ['-1', -1], ['+1', 1], ['+5', 5]].forEach(function (n) {
-        var b = el('button', { type: 'button', class: 'chip', text: n[0] });
-        b.addEventListener('click', function () { nudge(input, n[1]); });
-        row.appendChild(b);
       });
       row.appendChild(check);
       return row;

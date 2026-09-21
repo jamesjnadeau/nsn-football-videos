@@ -208,10 +208,31 @@ main { padding: 24px 16px 48px; }
 
 /* ---- game detail ----------------------------------------------------- */
 .player {
-  aspect-ratio: 16 / 9; width: 100%;
+  aspect-ratio: 16 / 9; width: 100%; display: block;
   border: 0; border-radius: var(--radius);
   background: #000; box-shadow: var(--shadow);
 }
+.player-note { margin: 8px 0 0; }
+
+/* ---- game page layout --------------------------------------------------
+ * One column by default. The second column only exists for signed-in markers,
+ * so the grid stays single until the plays panel is actually put in it --
+ * otherwise everyone else would get a third of the page as empty space.
+ * The transcript sits outside this grid, full width underneath. */
+.game-grid { display: grid; gap: 22px; align-items: start; }
+
+@media (min-width: 1000px) {
+  .game-grid.has-side { grid-template-columns: 2fr 1fr; }
+  /* The plays list follows a long broadcast, so let it scroll by itself
+     rather than dragging the page down past the video. */
+  .game-grid.has-side .game-side .panel {
+    position: sticky; top: 16px;
+    max-height: calc(100vh - 32px); overflow-y: auto;
+  }
+}
+.game-primary { min-width: 0; }
+.game-side { min-width: 0; }
+.game-side:empty { display: none; }
 .detail-facts {
   display: flex; flex-wrap: wrap; gap: 8px 20px;
   margin: 16px 0; padding: 0; list-style: none;
@@ -297,6 +318,16 @@ main { padding: 24px 16px 48px; }
   border: 1px solid var(--border); border-radius: var(--radius); padding: 9px 12px;
 }
 .play-row:hover { border-color: var(--green); }
+
+/* A play and its remove control share a row; the button itself stays a full
+   click target so seeking is easy on a phone. */
+.play-row-wrap { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.play-row-wrap > .play-row { flex: 1 1 auto; }
+.confirm { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.chip.danger { color: var(--accent); border-color: var(--accent); }
+.chip.danger:hover { background: var(--accent); color: var(--surface); border-color: var(--accent); }
+.chip.primary { color: var(--green); border-color: var(--green); }
+.chip.primary:hover { background: var(--green); color: var(--surface); }
 .play-time { font-variant-numeric: tabular-nums; font-weight: 700; color: var(--green); }
 .play-label { font-weight: 600; overflow-wrap: break-word; }
 .play-meta { color: var(--muted); font-size: .8rem; }
@@ -356,5 +387,6 @@ main { padding: 24px 16px 48px; }
 @media (max-width: 560px) {
   .play-row { grid-template-columns: 62px 1fr; }
   .play-row .play-meta { grid-column: 2; }
+  .play-row-wrap > .play-row { flex-basis: 100%; }
   .cue { grid-template-columns: 58px 1fr; }
 }
