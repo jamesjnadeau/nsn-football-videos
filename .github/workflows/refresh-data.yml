@@ -1,0 +1,35 @@
+name: Refresh game data
+
+on:
+  schedule:
+    # Mondays at 10:00 UTC — after the weekend's games have been posted.
+    - cron: '0 10 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Fetch broadcasts from NSN
+        run: python3 scripts/fetch_games.py
+
+      - name: Commit any changes
+        run: |
+          if git diff --quiet -- docs/data/games.json data/raw_broadcasts.json; then
+            echo "No new broadcasts."
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/data/games.json data/raw_broadcasts.json
+          git commit -m "Refresh NSN game data"
+          git push
