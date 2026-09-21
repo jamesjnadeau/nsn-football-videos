@@ -504,13 +504,19 @@
       el('h2', { text: 'Marked plays' }), status, list, actions
     ]);
 
+    var shown = [];              // markers currently listed
+    var submitted = [];          // numbers this session has sent, approved or not
+
     function refresh() {
       api('markers?game=' + encodeURIComponent(g.id)).then(function (r) {
         if (r && r.body) draw(r.body.markers || []);
       });
     }
 
+    function nextLabel() { return String(nextPlayNumber(shown, submitted)); }
+
     function draw(markers) {
+      shown = markers;
       list.innerHTML = '';
       if (!markers.length) {
         status.textContent = 'No plays marked yet.';
@@ -528,7 +534,8 @@
       var open = el('button', { type: 'button', class: 'btn secondary', text: '+ Mark a play' });
       open.addEventListener('click', function () {
         open.remove();
-        actions.appendChild(markForm(g, user, function (marker) {
+        actions.appendChild(markForm(g, user, nextLabel, function (marker) {
+          if (/^\d{1,6}$/.test(String(marker.label))) submitted.push(Number(marker.label));
           // Published markers appear at once; queued ones must not, or the
           // submitter will think everyone can see them.
           if (marker.status === 'approved') refresh();
@@ -538,6 +545,25 @@
     });
 
     return wrap;
+  }
+
+  /**
+   * The number to offer for the next play on this broadcast.
+   *
+   * One past the highest number already used, rather than one past the count:
+   * a play labelled by hand ("Touchdown, Spaulding") must not consume a number,
+   * and removing the last play should hand its number back rather than leave a
+   * gap. `alsoUsed` carries numbers this session has already submitted, which
+   * matters for people whose plays queue for review and so never come back in
+   * the list.
+   */
+  function nextPlayNumber(markers, alsoUsed) {
+    var highest = 0;
+    (markers || []).concat(alsoUsed || []).forEach(function (m) {
+      var label = typeof m === 'number' ? String(m) : String((m && m.label) || '');
+      if (/^\d{1,6}$/.test(label.trim())) highest = Math.max(highest, Number(label.trim()));
+    });
+    return highest + 1;
   }
 
   /** Whoever marked a play can take it down again; so can a moderator. */
@@ -608,10 +634,13 @@
 
   var markTarget = null;   // {set: fn} while the form is capturing a transcript line
 
-  function markForm(g, user, onSaved) {
+  function markForm(g, user, nextLabel, onSaved) {
     var startIn = el('input', { type: 'text', inputmode: 'numeric', placeholder: 'm:ss', 'aria-label': 'Start time' });
     var endIn = el('input', { type: 'text', inputmode: 'numeric', placeholder: 'm:ss', 'aria-label': 'End time' });
-    var labelIn = el('input', { type: 'text', maxlength: '80', placeholder: 'e.g. Touchdown, Spaulding', 'aria-label': 'Label' });
+    var labelIn = el('input', {
+      type: 'text', maxlength: '80', placeholder: 'e.g. Touchdown, Spaulding',
+      'aria-label': 'Label', value: nextLabel(),
+    });
     var noteIn = el('input', { type: 'text', maxlength: '280', placeholder: 'Optional note', 'aria-label': 'Note' });
     var msg = el('p', { class: 'small' });
 
@@ -700,6 +729,9 @@
       }
       form.reset();
       onSaved(res.body.marker);
+      // reset() empties the label; put the next number in so marking a run of
+      // plays stays a matter of two times and Save.
+      labelIn.value = nextLabel();
     });
 
     return form;
