@@ -524,7 +524,21 @@
       }
       status.textContent = markers.length + ' play' + (markers.length === 1 ? '' : 's') + ' marked';
       markers.forEach(function (m) {
-        list.appendChild(el('li', {}, [playRow(g, m, user, refresh)]));
+        var li = el('li', {});
+        function showRow() {
+          li.innerHTML = '';
+          li.appendChild(playRow(g, m, user, refresh, showForm));
+        }
+        function showForm() {
+          li.innerHTML = '';
+          li.appendChild(markForm(g, user, {
+            existing: m,
+            onCancel: showRow,
+            onSaved: refresh,
+          }));
+        }
+        showRow();
+        list.appendChild(li);
       });
     }
 
@@ -534,11 +548,14 @@
       var open = el('button', { type: 'button', class: 'btn secondary', text: '+ Mark a play' });
       open.addEventListener('click', function () {
         open.remove();
-        actions.appendChild(markForm(g, user, nextLabel, function (marker) {
-          if (/^\d{1,6}$/.test(String(marker.label))) submitted.push(Number(marker.label));
-          // Published markers appear at once; queued ones must not, or the
-          // submitter will think everyone can see them.
-          if (marker.status === 'approved') refresh();
+        actions.appendChild(markForm(g, user, {
+          nextLabel: nextLabel,
+          onSaved: function (marker) {
+            if (/^\d{1,6}$/.test(String(marker.label))) submitted.push(Number(marker.label));
+            // Published markers appear at once; queued ones must not, or the
+            // submitter will think everyone can see them.
+            if (marker.status === 'approved') refresh();
+          },
         }));
       });
       actions.appendChild(open);
@@ -566,13 +583,22 @@
     return highest + 1;
   }
 
-  /** Whoever marked a play can take it down again; so can a moderator. */
-  function canRemovePlay(user, m) {
+  /* Drawn rather than typed: the pencil character renders anywhere from a tiny
+   * dash to a colour emoji depending on the font stack. This is the same shape
+   * in every browser, takes the chip's colour in both themes, and stays crisp. */
+  var PENCIL =
+    '<svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true" focusable="false">' +
+    '<path fill="currentColor" d="M9.9 3.5 L2.2 11.2 L1.2 14.8 L4.8 13.8 L12.5 6.1 Z"/>' +
+    '<path fill="currentColor" d="M11.0 2.4 L13.6 5.0 L15.2 3.4 L12.6 0.8 Z"/>' +
+    '</svg>';
+
+  /** Whoever marked a play can edit or remove it; so can a moderator. */
+  function canModifyPlay(user, m) {
     if (!user || !m) return false;
     return NSNAuth.is('moderator', user) || m.createdBy === user.id;
   }
 
-  function playRow(g, m, user, onRemoved) {
+  function playRow(g, m, user, onChanged, onEdit) {
     // Who marked a play is useful but not what you scan the list for, so it
     // lives in the tooltip -- which is also the button's description for a
     // screen reader -- rather than taking room on every row.
@@ -588,7 +614,14 @@
     go.addEventListener('click', function () { seekPlayer(g, m.startSec); });
 
     var row = el('div', { class: 'play-row-wrap' }, [go]);
-    if (!canRemovePlay(user, m)) return row;
+    if (!canModifyPlay(user, m)) return row;
+
+    var edit = el('button', {
+      type: 'button', class: 'chip icon', html: PENCIL,
+      title: 'Edit this play', 'aria-label': 'Edit the play "' + m.label + '"',
+    });
+    edit.addEventListener('click', onEdit);
+    row.appendChild(edit);
 
     // Removing is destructive and the rows are small, so it takes two presses:
     // the second one is the confirmation, and it is easy to back out of.
@@ -625,7 +658,7 @@
           remove.style.display = '';
           return;
         }
-        onRemoved();
+        onChanged();
       });
     });
 
@@ -634,14 +667,31 @@
 
   var markTarget = null;   // {set: fn} while the form is capturing a transcript line
 
-  function markForm(g, user, nextLabel, onSaved) {
-    var startIn = el('input', { type: 'text', inputmode: 'numeric', placeholder: 'm:ss', 'aria-label': 'Start time' });
-    var endIn = el('input', { type: 'text', inputmode: 'numeric', placeholder: 'm:ss', 'aria-label': 'End time' });
+  /**
+   * The play form, for both jobs.
+   *
+   * opts.existing turns it into an edit of that marker: the fields arrive
+   * filled, saving PATCHes instead of POSTing, and Cancel puts the row back.
+   */
+  function markForm(g, user, opts) {
+    var existing = opts.existing || null;
+    var nextLabel = opts.nextLabel || function () { return ''; };
+    var startIn = el('input', {
+      type: 'text', inputmode: 'numeric', placeholder: 'm:ss', 'aria-label': 'Start time',
+      value: existing ? secsToClock(existing.startSec) : '',
+    });
+    var endIn = el('input', {
+      type: 'text', inputmode: 'numeric', placeholder: 'm:ss', 'aria-label': 'End time',
+      value: existing ? secsToClock(existing.endSec) : '',
+    });
     var labelIn = el('input', {
       type: 'text', maxlength: '80', placeholder: 'e.g. Touchdown, Spaulding',
-      'aria-label': 'Label', value: nextLabel(),
+      'aria-label': 'Label', value: existing ? existing.label : nextLabel(),
     });
-    var noteIn = el('input', { type: 'text', maxlength: '280', placeholder: 'Optional note', 'aria-label': 'Note' });
+    var noteIn = el('input', {
+      type: 'text', maxlength: '280', placeholder: 'Optional note', 'aria-label': 'Note',
+      value: (existing && existing.note) || '',
+    });
     var msg = el('p', { class: 'small' });
 
     function timeRow(labelText, input, which) {
@@ -679,13 +729,22 @@
       return row;
     }
 
-    var save = el('button', { type: 'submit', class: 'btn', text: 'Save play' });
+    var save = el('button', {
+      type: 'submit', class: 'btn', text: existing ? 'Save changes' : 'Save play',
+    });
+    var buttons = el('div', { class: 'time-row' }, [save]);
+    if (opts.onCancel) {
+      var cancel = el('button', { type: 'button', class: 'btn secondary', text: 'Cancel' });
+      cancel.addEventListener('click', function () { markTarget = null; opts.onCancel(); });
+      buttons.appendChild(cancel);
+    }
+
     var form = el('form', { class: 'mark-form' }, [
       timeRow('Start', startIn, 'start'),
       timeRow('End', endIn, 'end'),
       el('div', { class: 'time-row' }, [el('label', { class: 'time-label', text: 'Label' }), labelIn]),
       el('div', { class: 'time-row' }, [el('label', { class: 'time-label', text: 'Note' }), noteIn]),
-      el('div', { class: 'time-row' }, [save]),
+      buttons,
       msg,
     ]);
 
@@ -697,27 +756,28 @@
 
       save.disabled = true;
       msg.textContent = 'Saving…';
-      var res = await api('markers', {
-        method: 'POST',
-        body: JSON.stringify({
-          gameId: g.id, startSec: startSec, endSec: endSec,
-          label: labelIn.value, note: noteIn.value,
-          durationSec: g.durationSec,
-        }),
+      var body = JSON.stringify({
+        gameId: g.id, startSec: startSec, endSec: endSec,
+        label: labelIn.value, note: noteIn.value,
+        durationSec: g.durationSec,
       });
+      var res = existing
+        ? await api('markers?game=' + encodeURIComponent(g.id) + '&id=' + encodeURIComponent(existing.id),
+                    { method: 'PATCH', body: body })
+        : await api('markers', { method: 'POST', body: body });
       save.disabled = false;
 
       if (!res) { msg.textContent = 'Could not reach the server.'; return; }
       if (!res.ok) { msg.textContent = (res.body && res.body.error) || 'Could not save that.'; return; }
 
       markTarget = null;
-      if (res.body.status === 'published') {
-        msg.textContent = 'Published — everyone can see it.';
-      } else {
-        msg.textContent = 'Sent for review. It appears once a moderator approves it.';
-      }
+      if (existing) { opts.onSaved(res.body.marker); return; }   // the caller closes the form
+
+      msg.textContent = res.body.status === 'published'
+        ? 'Published — everyone can see it.'
+        : 'Sent for review. It appears once a moderator approves it.';
       form.reset();
-      onSaved(res.body.marker);
+      opts.onSaved(res.body.marker);
       // reset() empties the label; put the next number in so marking a run of
       // plays stays a matter of two times and Save.
       labelIn.value = nextLabel();

@@ -2,6 +2,7 @@
  *
  *   GET     ?game=<id>              approved markers; public, cached briefly
  *   POST                             submit a marker; requires a signed-in user
+ *   PATCH   ?game=<id>&id=<marker>   change one; its author or a moderator
  *   DELETE  ?game=<id>&id=<marker>   take one down; its author or a moderator
  *
  * Both live in one function on purpose. Netlify routes by path, and a second
@@ -13,7 +14,7 @@ import { getUser } from '@netlify/identity';
 import {
   validateMarker, canPublishDirectly, newMarker, appendApproved,
   approvedKey, pendingKey, pendingPrefix, isDuplicate, MAX_PENDING_PER_USER,
-  canRemove, removeApproved,
+  canModify, removeApproved, updateApproved,
 } from '../lib/markers.mjs';
 import { json, problem, readJson, openStore } from '../lib/http.mjs';
 
@@ -91,7 +92,7 @@ async function deleteMarker(req) {
   const marker = existing.find((m) => m.id === markerId);
   if (!marker) return json({ status: 'gone' }, 200);
 
-  if (!canRemove(user, marker)) {
+  if (!canModify(user, marker)) {
     return problem('only the person who marked this play, or a moderator, can remove it', 403);
   }
 
@@ -99,11 +100,58 @@ async function deleteMarker(req) {
   return json({ status: removed ? 'removed' : 'gone', id: markerId }, 200);
 }
 
+/** Change a published play's times, label or note. */
+async function editMarker(req) {
+  const params = new URL(req.url).searchParams;
+  const gameId = params.get('game') || '';
+  const markerId = params.get('id') || '';
+  if (!/^\d{1,20}$/.test(gameId)) return problem('game must be a broadcast id');
+  if (!markerId) return problem('id is required');
+
+  const user = await getUser();
+  if (!user) return problem('sign in to edit a play', 401);
+
+  const body = await readJson(req);
+  if (!body.ok) return problem(body.error);
+
+  const store = await openStore('markers');
+  const markers = (await store.get(approvedKey(gameId), { type: 'json' }))?.markers ?? [];
+  const existing = markers.find((m) => m.id === markerId);
+  if (!existing) return problem('that play is no longer there', 404);
+
+  if (!canModify(user, existing)) {
+    return problem('only the person who marked this play, or a moderator, can edit it', 403);
+  }
+
+  // Same rules as creating one; the gameId comes from the URL, never the body.
+  const durationSec = Number(body.value.durationSec);
+  const parsed = validateMarker({ ...body.value, gameId }, { durationSec });
+  if (!parsed.ok) return problem(parsed.error);
+
+  // It may of course still overlap itself.
+  if (isDuplicate(parsed.value, markers.filter((m) => m.id !== markerId))) {
+    return problem('that play is already marked', 409);
+  }
+
+  const { updated, marker } = await updateApproved(store, gameId, markerId, {
+    startSec: parsed.value.startSec,
+    endSec: parsed.value.endSec,
+    label: parsed.value.label,
+    note: parsed.value.note,
+    editedAt: new Date().toISOString(),
+    editedByName: user.name || (user.email ? user.email.split('@')[0] : 'someone'),
+  });
+  if (!updated) return problem('that play is no longer there', 404);
+
+  return json({ status: 'updated', marker }, 200);
+}
+
 export default async (req) => {
   if (req.method === 'GET') return listMarkers(req);
   if (req.method === 'POST') return submitMarker(req);
+  if (req.method === 'PATCH') return editMarker(req);
   if (req.method === 'DELETE') return deleteMarker(req);
-  return problem('use GET, POST or DELETE', 405);
+  return problem('use GET, POST, PATCH or DELETE', 405);
 };
 
 export const config = { path: '/api/markers' };

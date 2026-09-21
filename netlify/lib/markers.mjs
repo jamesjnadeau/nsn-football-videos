@@ -133,8 +133,9 @@ export async function appendApproved(store, gameId, marker, { attempts = 5 } = {
   throw new Error('could not save marker after repeated write conflicts');
 }
 
-/** Who may take a published marker down: whoever put it up, or a moderator. */
-export function canRemove(user, marker) {
+/** Who may change a published marker at all -- edit or remove it: whoever put
+ *  it up, or a moderator. */
+export function canModify(user, marker) {
   if (!user || !marker) return false;
   return isModerator(user) || marker.createdBy === user.id;
 }
@@ -159,4 +160,39 @@ export async function removeApproved(store, gameId, markerId, { attempts = 5 } =
     if (modified) return { removed: true, marker, markers: next.markers };
   }
   throw new Error('could not remove marker after repeated write conflicts');
+}
+
+/**
+ * Change one marker in place, under the same compare-and-swap as the other
+ * writers. Identity and provenance are not the caller's to change: the id, who
+ * marked it, when, and its status all survive the merge.
+ */
+export async function updateApproved(store, gameId, markerId, changes, { attempts = 5 } = {}) {
+  for (let i = 0; i < attempts; i++) {
+    const key = approvedKey(gameId);
+    const current = await store.getWithMetadata(key, { type: 'json', consistency: 'strong' });
+    const markers = current?.data?.markers ?? [];
+
+    const existing = markers.find((m) => m.id === markerId);
+    if (!existing) return { updated: false, marker: null, markers };
+
+    const merged = {
+      ...existing,
+      ...changes,
+      id: existing.id,
+      createdBy: existing.createdBy,
+      createdByName: existing.createdByName,
+      createdAt: existing.createdAt,
+      status: existing.status,
+    };
+    // Editing a start time reorders the list, which is kept sorted for display.
+    const next = {
+      markers: markers
+        .map((m) => (m.id === markerId ? merged : m))
+        .sort((a, b) => a.startSec - b.startSec),
+    };
+    const { modified } = await store.setJSON(key, next, { onlyIfMatch: current.etag });
+    if (modified) return { updated: true, marker: merged, markers: next.markers };
+  }
+  throw new Error('could not update marker after repeated write conflicts');
 }
