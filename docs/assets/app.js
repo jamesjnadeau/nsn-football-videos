@@ -757,12 +757,23 @@
         }
         goToAccount();
       } catch (err) {
-        msg.textContent = (err && err.message) || 'That did not work.';
+        msg.textContent = explainTokenError(err);
         submit.disabled = false;
       }
     });
 
     return form;
+  }
+
+  /** Identity answers a stale invite with a bare "User not found", which reads
+   *  like a site fault rather than an expired link. Say what it means. */
+  function explainTokenError(err) {
+    var raw = (err && err.message) || '';
+    if (/user not found|invalid|expired|not_found/i.test(raw)) {
+      return 'This link is no longer valid — it has already been used, or it has expired. '
+        + 'Ask a moderator to send a fresh invite.';
+    }
+    return raw || 'That did not work.';
   }
 
   function authCallbackView(pending) {
@@ -789,7 +800,7 @@
       ]);
       NSNAuth.confirmEmail(pending.token).then(goToAccount).catch(function (err) {
         note.className = 'empty';
-        note.textContent = (err && err.message) || 'That link could not be confirmed.';
+        note.textContent = explainTokenError(err);
       });
       return;
     }
