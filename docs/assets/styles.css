@@ -32,6 +32,10 @@ body {
 a { color: var(--green); }
 
 .wrap { max-width: 1100px; margin: 0 auto; padding: 0 16px; }
+/* The game page in two columns is the one view that wants the whole display,
+   so it drops the measure the rest of the site reads better for. #main already
+   provides the side gutter, so the inner one goes too rather than doubling. */
+body.wide #main > .wrap { max-width: none; padding-left: 0; padding-right: 0; }
 
 .muted { color: var(--muted); }
 
@@ -321,9 +325,13 @@ main { padding: 24px 16px 48px; }
 
 /* A play and its remove control share a row; the button itself stays a full
    click target so seeking is easy on a phone. */
-.play-row-wrap { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-.play-row-wrap > .play-row { flex: 1 1 auto; }
+.play-row-wrap { display: flex; gap: 8px; align-items: center; }
+.play-row-wrap > .play-row { flex: 1 1 0; min-width: 0; }
+/* Only the confirmation is allowed a second line; it is transient and needs
+   more room than the single chip it replaces. */
+.play-row-wrap:has(.confirm:not(:empty)) { flex-wrap: wrap; }
 .confirm { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.confirm:empty { display: none; }
 .chip.danger { color: var(--accent); border-color: var(--accent); }
 .chip.danger:hover { background: var(--accent); color: var(--surface); border-color: var(--accent); }
 .chip.primary { color: var(--green); border-color: var(--green); }
@@ -385,8 +393,6 @@ main { padding: 24px 16px 48px; }
 .review-actions { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 6px; }
 
 @media (max-width: 560px) {
-  .play-row { grid-template-columns: 62px 1fr; }
-  .play-row .play-meta { grid-column: 2; }
-  .play-row-wrap > .play-row { flex-basis: 100%; }
+  .play-row { grid-template-columns: 58px 1fr auto; gap: 8px; padding: 9px 10px; }
   .cue { grid-template-columns: 58px 1fr; }
 }

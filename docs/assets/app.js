@@ -478,6 +478,8 @@
     // Plays are part of the marking tool, so they appear with it.
     side.appendChild(playsPanel(g, user));
     side.closest('.game-grid').classList.add('has-side');
+    // Two columns earn the full display; route() clears this on the way out.
+    document.body.classList.add('wide');
 
     var res = await api('stream?game=' + encodeURIComponent(g.id));
     if (!res || !res.ok || !res.body || !res.body.master) return;   // keep the embed
@@ -545,10 +547,17 @@
   }
 
   function playRow(g, m, user, onRemoved) {
-    var go = el('button', { type: 'button', class: 'play-row' }, [
+    // Who marked a play is useful but not what you scan the list for, so it
+    // lives in the tooltip -- which is also the button's description for a
+    // screen reader -- rather than taking room on every row.
+    var by = m.createdByName || 'someone';
+    var go = el('button', {
+      type: 'button', class: 'play-row',
+      title: 'Marked by ' + by + (m.note ? ' — ' + m.note : ''),
+    }, [
       el('span', { class: 'play-time', text: secsToClock(m.startSec) }),
       el('span', { class: 'play-label', text: m.label }),
-      el('span', { class: 'play-meta', text: Math.round(m.endSec - m.startSec) + 's · ' + (m.createdByName || 'someone') })
+      el('span', { class: 'play-meta', text: Math.round(m.endSec - m.startSec) + 's' })
     ]);
     go.addEventListener('click', function () { seekPlayer(g, m.startSec); });
 
@@ -1174,6 +1183,7 @@
 
   function route() {
     callbackShowing = false;   // navigating away retires the callback view
+    document.body.classList.remove('wide');
     var hash = location.hash || '#/timeline';
     var parts = hash.replace(/^#\/?/, '').split('/');
 
