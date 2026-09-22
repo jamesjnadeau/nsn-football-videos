@@ -231,7 +231,8 @@ python3 scripts/fetch_games.py --all-sports   # keep soccer etc. as well as foot
 
 The fetch takes about a minute and is deliberately unhurried — it sleeps between
 pages rather than hammering someone else's server. `.github/workflows/refresh-data.yml`
-runs it weekly during the season and commits the result.
+runs it nightly at 02:00 UTC (10pm Eastern the evening before) and commits the
+result only when something actually changed.
 
 ## Title parsing
 
