@@ -2,8 +2,10 @@ name: Refresh game data
 
 on:
   schedule:
-    # Mondays at 10:00 UTC — after the weekend's games have been posted.
-    - cron: '0 10 * * 1'
+    # Nightly at 02:00 UTC — 10pm Eastern the evening before, so a game that
+    # finishes in the evening is on the site by morning. GitHub cron is UTC
+    # only, so this is 10pm EDT in season and 9pm EST once the clocks go back.
+    - cron: '0 2 * * *'
   workflow_dispatch:
 
 jobs:
