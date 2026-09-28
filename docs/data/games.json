@@ -1,93 +1,15 @@
 {
- "generated": "2026-09-21T14:31:43.906992Z",
+ "generated": "2026-09-28T18:01:41.193056Z",
  "source": "https://www.nsnsports.net/high-schools/vermont/",
- "count": 259,
+ "count": 264,
  "games": [
-  {
-   "id": "4451222",
-   "title": "Spaulding vs. Rice",
-   "date": "2026-09-26T16:50:00Z",
-   "season": 2026,
-   "sport": "Football",
-   "status": "Upcoming",
-   "home": "Rice Memorial",
-   "away": "Spaulding",
-   "teams": [
-    "Spaulding",
-    "Rice Memorial"
-   ],
-   "teamSlugs": [
-    "spaulding",
-    "rice-memorial"
-   ],
-   "round": "",
-   "durationSec": null,
-   "embedUrl": "https://vcloud.hudl.com/broadcast/embed/4451222?autoplay=0",
-   "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/56/01/42/3/5601423.png",
-   "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4451222",
-   "pageUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4451222",
-   "requiresLogin": false,
-   "source": "NSN High Vermont"
-  },
-  {
-   "id": "4451223",
-   "title": "Missisquoi vs. Fairfax/Lamoille",
-   "date": "2026-09-26T16:50:00Z",
-   "season": 2026,
-   "sport": "Football",
-   "status": "Upcoming",
-   "home": "Fairfax/Lamoille",
-   "away": "Missisquoi",
-   "teams": [
-    "Missisquoi",
-    "Fairfax/Lamoille"
-   ],
-   "teamSlugs": [
-    "missisquoi",
-    "fairfax-lamoille"
-   ],
-   "round": "",
-   "durationSec": null,
-   "embedUrl": "https://vcloud.hudl.com/broadcast/embed/4451223?autoplay=0",
-   "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/43/81/40/7/4381407.png",
-   "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4451223",
-   "pageUrl": "https://www.nsnsports.net/sponsors/nwmc/?bfplayvid=4451223",
-   "requiresLogin": false,
-   "source": "Northwestern Medical Center"
-  },
-  {
-   "id": "4451224",
-   "title": "Springfield vs. Mill River",
-   "date": "2026-09-26T16:50:00Z",
-   "season": 2026,
-   "sport": "Football",
-   "status": "Upcoming",
-   "home": "Mill River",
-   "away": "Springfield",
-   "teams": [
-    "Springfield",
-    "Mill River"
-   ],
-   "teamSlugs": [
-    "springfield",
-    "mill-river"
-   ],
-   "round": "",
-   "durationSec": null,
-   "embedUrl": "https://vcloud.hudl.com/broadcast/embed/4451224?autoplay=0",
-   "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/23/62/06/236206.png",
-   "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4451224",
-   "pageUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4451224",
-   "requiresLogin": false,
-   "source": "NSN High Vermont"
-  },
   {
    "id": "4451225",
    "title": "Milton vs. Windsor",
    "date": "2026-09-26T16:50:00Z",
    "season": 2026,
    "sport": "Football",
-   "status": "Upcoming",
+   "status": "Archived",
    "home": "Windsor",
    "away": "Milton",
    "teams": [
@@ -99,7 +21,7 @@
     "windsor"
    ],
    "round": "",
-   "durationSec": null,
+   "durationSec": 8930,
    "embedUrl": "https://vcloud.hudl.com/broadcast/embed/4451225?autoplay=0",
    "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/23/62/06/236206.png",
    "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4451225",
@@ -108,30 +30,82 @@
    "source": "NSN High Vermont"
   },
   {
-   "id": "4451220",
-   "title": "St. Johnsbury vs. CVU",
-   "date": "2026-09-26T16:45:00Z",
+   "id": "4451223",
+   "title": "Missisquoi vs. Fairfax/Lamoille",
+   "date": "2026-09-26T16:50:00Z",
    "season": 2026,
    "sport": "Football",
-   "status": "Upcoming",
-   "home": "CVU",
-   "away": "St. Johnsbury",
+   "status": "Archived",
+   "home": "Fairfax/Lamoille",
+   "away": "Missisquoi",
    "teams": [
-    "St. Johnsbury",
-    "CVU"
+    "Missisquoi",
+    "Fairfax/Lamoille"
    ],
    "teamSlugs": [
-    "st-johnsbury",
-    "cvu"
+    "missisquoi",
+    "fairfax-lamoille"
    ],
    "round": "",
-   "durationSec": null,
-   "embedUrl": "https://vcloud.hudl.com/broadcast/embed/4451220?autoplay=0",
-   "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/43/62/50/0/4362500.png",
-   "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4451220",
-   "pageUrl": "https://www.nsnsports.net/sponsors/crosstown-littleton/?bfplayvid=4451220",
+   "durationSec": 8020,
+   "embedUrl": "https://vcloud.hudl.com/broadcast/embed/4451223?autoplay=0",
+   "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/43/81/40/7/4381407.png",
+   "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4451223",
+   "pageUrl": "https://www.nsnsports.net/sponsors/nwmc/?bfplayvid=4451223",
    "requiresLogin": false,
-   "source": "LittletonChevy"
+   "source": "Northwestern Medical Center"
+  },
+  {
+   "id": "4451222",
+   "title": "Spaulding vs. Rice",
+   "date": "2026-09-26T16:50:00Z",
+   "season": 2026,
+   "sport": "Football",
+   "status": "Archived",
+   "home": "Rice Memorial",
+   "away": "Spaulding",
+   "teams": [
+    "Spaulding",
+    "Rice Memorial"
+   ],
+   "teamSlugs": [
+    "spaulding",
+    "rice-memorial"
+   ],
+   "round": "",
+   "durationSec": 9310,
+   "embedUrl": "https://vcloud.hudl.com/broadcast/embed/4451222?autoplay=0",
+   "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/56/01/42/3/5601423.png",
+   "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4451222",
+   "pageUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4451222",
+   "requiresLogin": false,
+   "source": "NSN High Vermont"
+  },
+  {
+   "id": "4451224",
+   "title": "Springfield vs. Mill River",
+   "date": "2026-09-26T16:50:00Z",
+   "season": 2026,
+   "sport": "Football",
+   "status": "Archived",
+   "home": "Mill River",
+   "away": "Springfield",
+   "teams": [
+    "Springfield",
+    "Mill River"
+   ],
+   "teamSlugs": [
+    "springfield",
+    "mill-river"
+   ],
+   "round": "",
+   "durationSec": 8830,
+   "embedUrl": "https://vcloud.hudl.com/broadcast/embed/4451224?autoplay=0",
+   "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/23/62/06/236206.png",
+   "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4451224",
+   "pageUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4451224",
+   "requiresLogin": false,
+   "source": "NSN High Vermont"
   },
   {
    "id": "4451221",
@@ -139,7 +113,7 @@
    "date": "2026-09-26T16:45:00Z",
    "season": 2026,
    "sport": "Football",
-   "status": "Upcoming",
+   "status": "Archived",
    "home": "Lyndon Institute",
    "away": "Mt. Mansfield",
    "teams": [
@@ -151,7 +125,7 @@
     "lyndon-institute"
    ],
    "round": "",
-   "durationSec": null,
+   "durationSec": 9260,
    "embedUrl": "https://vcloud.hudl.com/broadcast/embed/4451221?autoplay=0",
    "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/43/62/50/0/4362500.png",
    "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4451221",
@@ -160,116 +134,38 @@
    "source": "LittletonChevy"
   },
   {
-   "id": "4451038",
-   "title": "Woodstock vs. Mt. Abraham",
-   "date": "2026-09-25T22:50:00Z",
+   "id": "4451220",
+   "title": "St. Johnsbury vs. CVU",
+   "date": "2026-09-26T16:45:00Z",
    "season": 2026,
    "sport": "Football",
-   "status": "Upcoming",
-   "home": "Mt. Abraham/Vergennes",
-   "away": "Woodstock",
+   "status": "Archived",
+   "home": "CVU",
+   "away": "St. Johnsbury",
    "teams": [
-    "Woodstock",
-    "Mt. Abraham/Vergennes"
+    "St. Johnsbury",
+    "CVU"
    ],
    "teamSlugs": [
-    "woodstock",
-    "mt-abraham-vergennes"
+    "st-johnsbury",
+    "cvu"
    ],
    "round": "",
-   "durationSec": null,
-   "embedUrl": "https://vcloud.hudl.com/broadcast/embed/4451038?autoplay=0",
-   "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/32/28/89/0/3228890.png",
-   "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4451038",
-   "pageUrl": "https://www.nsnsports.net/sponsors/vt-plumbing/?bfplayvid=4451038",
+   "durationSec": 9830,
+   "embedUrl": "https://vcloud.hudl.com/broadcast/embed/4451220?autoplay=0",
+   "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/43/62/50/0/4362500.png",
+   "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4451220",
+   "pageUrl": "https://www.nsnsports.net/sponsors/crosstown-littleton/?bfplayvid=4451220",
    "requiresLogin": false,
-   "source": "VT Plumbing Heating"
+   "source": "LittletonChevy"
   },
   {
-   "id": "4451037",
-   "title": "Bellows Falls vs. U-32",
-   "date": "2026-09-25T22:50:00Z",
+   "id": "4520389",
+   "title": "Burr & Burton vs. Seawolves 2",
+   "date": "2026-09-26T00:50:00Z",
    "season": 2026,
    "sport": "Football",
-   "status": "Upcoming",
-   "home": "U-32",
-   "away": "Bellows Falls",
-   "teams": [
-    "Bellows Falls",
-    "U-32"
-   ],
-   "teamSlugs": [
-    "bellows-falls",
-    "u-32"
-   ],
-   "round": "",
-   "durationSec": null,
-   "embedUrl": "https://vcloud.hudl.com/broadcast/embed/4451037?autoplay=0",
-   "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/32/28/89/0/3228890.png",
-   "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4451037",
-   "pageUrl": "https://www.nsnsports.net/sponsors/lovell-farms/?bfplayvid=4451037",
-   "requiresLogin": false,
-   "source": "Lovell Farms"
-  },
-  {
-   "id": "4451035",
-   "title": "Mt. Anthony vs. Middlebury",
-   "date": "2026-09-25T22:50:00Z",
-   "season": 2026,
-   "sport": "Football",
-   "status": "Upcoming",
-   "home": "Middlebury",
-   "away": "Mt. Anthony",
-   "teams": [
-    "Mt. Anthony",
-    "Middlebury"
-   ],
-   "teamSlugs": [
-    "mt-anthony",
-    "middlebury"
-   ],
-   "round": "",
-   "durationSec": null,
-   "embedUrl": "https://vcloud.hudl.com/broadcast/embed/4451035?autoplay=0",
-   "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/32/28/89/0/3228890.png",
-   "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4451035",
-   "pageUrl": "https://www.nsnsports.net/sponsors/dennis-newton/?bfplayvid=4451035",
-   "requiresLogin": false,
-   "source": "Dennis Newton Electrical"
-  },
-  {
-   "id": "4451034",
-   "title": "Rutland vs. Essex",
-   "date": "2026-09-25T22:50:00Z",
-   "season": 2026,
-   "sport": "Football",
-   "status": "Upcoming",
-   "home": "Essex",
-   "away": "Rutland",
-   "teams": [
-    "Rutland",
-    "Essex"
-   ],
-   "teamSlugs": [
-    "rutland",
-    "essex"
-   ],
-   "round": "",
-   "durationSec": null,
-   "embedUrl": "https://vcloud.hudl.com/broadcast/embed/4451034?autoplay=0",
-   "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/23/62/06/236206.png",
-   "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4451034",
-   "pageUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4451034",
-   "requiresLogin": false,
-   "source": "NSN High Vermont"
-  },
-  {
-   "id": "4451033",
-   "title": "Burr & Burton vs. Seawolves",
-   "date": "2026-09-25T22:50:00Z",
-   "season": 2026,
-   "sport": "Football",
-   "status": "Upcoming",
+   "status": "Archived",
    "home": "Seawolves",
    "away": "Burr & Burton",
    "teams": [
@@ -281,73 +177,75 @@
     "seawolves"
    ],
    "round": "",
-   "durationSec": null,
-   "embedUrl": "https://vcloud.hudl.com/broadcast/embed/4451033?autoplay=0",
+   "durationSec": 970,
+   "embedUrl": "https://vcloud.hudl.com/broadcast/embed/4520389?autoplay=0",
    "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/23/62/06/236206.png",
-   "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4451033",
-   "pageUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4451033",
+   "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4520389",
+   "pageUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4520389",
    "requiresLogin": false,
-   "source": "NSN High Vermont"
+   "source": "NSN High Vermont",
+   "part": 2
   },
   {
-   "id": "4451040",
-   "title": "Colchester vs. BFA St. Albans",
+   "id": "4520457",
+   "title": "Rutland vs. Essex 2",
+   "date": "2026-09-26T00:50:00Z",
+   "season": 2026,
+   "sport": "Football",
+   "status": "Archived",
+   "home": "Essex",
+   "away": "Rutland",
+   "teams": [
+    "Rutland",
+    "Essex"
+   ],
+   "teamSlugs": [
+    "rutland",
+    "essex"
+   ],
+   "round": "",
+   "durationSec": 1020,
+   "embedUrl": "https://vcloud.hudl.com/broadcast/embed/4520457?autoplay=0",
+   "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/23/62/06/236206.png",
+   "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4520457",
+   "pageUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4520457",
+   "requiresLogin": false,
+   "source": "NSN High Vermont",
+   "part": 2
+  },
+  {
+   "id": "4451037",
+   "title": "Bellows Falls vs. U-32",
    "date": "2026-09-25T22:50:00Z",
    "season": 2026,
    "sport": "Football",
-   "status": "Upcoming",
-   "home": "BFA-St. Albans",
-   "away": "Colchester",
+   "status": "Archived",
+   "home": "U-32",
+   "away": "Bellows Falls",
    "teams": [
-    "Colchester",
-    "BFA-St. Albans"
+    "Bellows Falls",
+    "U-32"
    ],
    "teamSlugs": [
-    "colchester",
-    "bfa-st-albans"
+    "bellows-falls",
+    "u-32"
    ],
    "round": "",
-   "durationSec": null,
-   "embedUrl": "https://vcloud.hudl.com/broadcast/embed/4451040?autoplay=0",
-   "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/43/81/40/7/4381407.png",
-   "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4451040",
-   "pageUrl": "https://www.nsnsports.net/sponsors/nwmc/?bfplayvid=4451040",
+   "durationSec": 8000,
+   "embedUrl": "https://vcloud.hudl.com/broadcast/embed/4451037?autoplay=0",
+   "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/32/28/89/0/3228890.png",
+   "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4451037",
+   "pageUrl": "https://www.nsnsports.net/sponsors/lovell-farms/?bfplayvid=4451037",
    "requiresLogin": false,
-   "source": "Northwestern Medical Center"
-  },
-  {
-   "id": "4451036",
-   "title": "Fair Haven vs. North Country",
-   "date": "2026-09-25T22:45:00Z",
-   "season": 2026,
-   "sport": "Football",
-   "status": "Upcoming",
-   "home": "North Country",
-   "away": "Fair Haven",
-   "teams": [
-    "Fair Haven",
-    "North Country"
-   ],
-   "teamSlugs": [
-    "fair-haven",
-    "north-country"
-   ],
-   "round": "",
-   "durationSec": null,
-   "embedUrl": "https://vcloud.hudl.com/broadcast/embed/4451036?autoplay=0",
-   "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/43/62/50/0/4362500.png",
-   "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4451036",
-   "pageUrl": "https://www.nsnsports.net/sponsors/crosstown-littleton/?bfplayvid=4451036",
-   "requiresLogin": false,
-   "source": "LittletonChevy"
+   "source": "Lovell Farms"
   },
   {
    "id": "4451039",
    "title": "Brattleboro vs. Hartford",
-   "date": "2026-09-25T16:50:00Z",
+   "date": "2026-09-25T22:50:00Z",
    "season": 2026,
    "sport": "Football",
-   "status": "Upcoming",
+   "status": "Archived",
    "home": "Hartford",
    "away": "Brattleboro",
    "teams": [
@@ -359,13 +257,169 @@
     "hartford"
    ],
    "round": "",
-   "durationSec": null,
+   "durationSec": 9370,
    "embedUrl": "https://vcloud.hudl.com/broadcast/embed/4451039?autoplay=0",
    "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/32/28/89/0/3228890.png",
    "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4451039",
    "pageUrl": "https://www.nsnsports.net/sponsors/hartford-auto/?bfplayvid=4451039",
    "requiresLogin": false,
    "source": "Hartford Auto"
+  },
+  {
+   "id": "4451033",
+   "title": "Burr & Burton vs. Seawolves",
+   "date": "2026-09-25T22:50:00Z",
+   "season": 2026,
+   "sport": "Football",
+   "status": "Archived",
+   "home": "Seawolves",
+   "away": "Burr & Burton",
+   "teams": [
+    "Burr & Burton",
+    "Seawolves"
+   ],
+   "teamSlugs": [
+    "burr-burton",
+    "seawolves"
+   ],
+   "round": "",
+   "durationSec": 8160,
+   "embedUrl": "https://vcloud.hudl.com/broadcast/embed/4451033?autoplay=0",
+   "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/23/62/06/236206.png",
+   "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4451033",
+   "pageUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4451033",
+   "requiresLogin": false,
+   "source": "NSN High Vermont"
+  },
+  {
+   "id": "4451034",
+   "title": "Rutland vs. Essex",
+   "date": "2026-09-25T22:50:00Z",
+   "season": 2026,
+   "sport": "Football",
+   "status": "Archived",
+   "home": "Essex",
+   "away": "Rutland",
+   "teams": [
+    "Rutland",
+    "Essex"
+   ],
+   "teamSlugs": [
+    "rutland",
+    "essex"
+   ],
+   "round": "",
+   "durationSec": 11350,
+   "embedUrl": "https://vcloud.hudl.com/broadcast/embed/4451034?autoplay=0",
+   "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/23/62/06/236206.png",
+   "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4451034",
+   "pageUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4451034",
+   "requiresLogin": false,
+   "source": "NSN High Vermont"
+  },
+  {
+   "id": "4451040",
+   "title": "Colchester vs. BFA St. Albans",
+   "date": "2026-09-25T22:50:00Z",
+   "season": 2026,
+   "sport": "Football",
+   "status": "Archived",
+   "home": "BFA-St. Albans",
+   "away": "Colchester",
+   "teams": [
+    "Colchester",
+    "BFA-St. Albans"
+   ],
+   "teamSlugs": [
+    "colchester",
+    "bfa-st-albans"
+   ],
+   "round": "",
+   "durationSec": 9700,
+   "embedUrl": "https://vcloud.hudl.com/broadcast/embed/4451040?autoplay=0",
+   "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/43/81/40/7/4381407.png",
+   "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4451040",
+   "pageUrl": "https://www.nsnsports.net/sponsors/nwmc/?bfplayvid=4451040",
+   "requiresLogin": false,
+   "source": "Northwestern Medical Center"
+  },
+  {
+   "id": "4451035",
+   "title": "Mt. Anthony vs. Middlebury",
+   "date": "2026-09-25T22:50:00Z",
+   "season": 2026,
+   "sport": "Football",
+   "status": "Archived",
+   "home": "Middlebury",
+   "away": "Mt. Anthony",
+   "teams": [
+    "Mt. Anthony",
+    "Middlebury"
+   ],
+   "teamSlugs": [
+    "mt-anthony",
+    "middlebury"
+   ],
+   "round": "",
+   "durationSec": 10010,
+   "embedUrl": "https://vcloud.hudl.com/broadcast/embed/4451035?autoplay=0",
+   "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/32/28/89/0/3228890.png",
+   "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4451035",
+   "pageUrl": "https://www.nsnsports.net/sponsors/dennis-newton/?bfplayvid=4451035",
+   "requiresLogin": false,
+   "source": "Dennis Newton Electrical"
+  },
+  {
+   "id": "4451038",
+   "title": "Woodstock vs. Mt. Abraham",
+   "date": "2026-09-25T22:50:00Z",
+   "season": 2026,
+   "sport": "Football",
+   "status": "Archived",
+   "home": "Mt. Abraham/Vergennes",
+   "away": "Woodstock",
+   "teams": [
+    "Woodstock",
+    "Mt. Abraham/Vergennes"
+   ],
+   "teamSlugs": [
+    "woodstock",
+    "mt-abraham-vergennes"
+   ],
+   "round": "",
+   "durationSec": 7530,
+   "embedUrl": "https://vcloud.hudl.com/broadcast/embed/4451038?autoplay=0",
+   "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/32/28/89/0/3228890.png",
+   "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4451038",
+   "pageUrl": "https://www.nsnsports.net/sponsors/vt-plumbing/?bfplayvid=4451038",
+   "requiresLogin": false,
+   "source": "VT Plumbing Heating"
+  },
+  {
+   "id": "4451036",
+   "title": "Fair Haven vs. North Country",
+   "date": "2026-09-25T22:45:00Z",
+   "season": 2026,
+   "sport": "Football",
+   "status": "Archived",
+   "home": "North Country",
+   "away": "Fair Haven",
+   "teams": [
+    "Fair Haven",
+    "North Country"
+   ],
+   "teamSlugs": [
+    "fair-haven",
+    "north-country"
+   ],
+   "round": "",
+   "durationSec": 9190,
+   "embedUrl": "https://vcloud.hudl.com/broadcast/embed/4451036?autoplay=0",
+   "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/43/62/50/0/4362500.png",
+   "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4451036",
+   "pageUrl": "https://www.nsnsports.net/sponsors/crosstown-littleton/?bfplayvid=4451036",
+   "requiresLogin": false,
+   "source": "LittletonChevy"
   },
   {
    "id": "4450499",
@@ -524,32 +578,6 @@
    "source": "NSN High Vermont"
   },
   {
-   "id": "4450050",
-   "title": "CVU vs. Seawolves",
-   "date": "2026-09-18T22:50:00Z",
-   "season": 2026,
-   "sport": "Football",
-   "status": "Archived",
-   "home": "Seawolves",
-   "away": "CVU",
-   "teams": [
-    "CVU",
-    "Seawolves"
-   ],
-   "teamSlugs": [
-    "cvu",
-    "seawolves"
-   ],
-   "round": "",
-   "durationSec": 10690,
-   "embedUrl": "https://vcloud.hudl.com/broadcast/embed/4450050?autoplay=0",
-   "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/56/08/41/5/5608415.png",
-   "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4450050",
-   "pageUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4450050",
-   "requiresLogin": false,
-   "source": "NSN High Vermont"
-  },
-  {
    "id": "4450057",
    "title": "Rice vs. Otter Valley",
    "date": "2026-09-18T22:50:00Z",
@@ -654,30 +682,30 @@
    "source": "NSN High Vermont"
   },
   {
-   "id": "4450051",
-   "title": "St. Johnsbury vs. Middlebury",
-   "date": "2026-09-18T22:45:00Z",
+   "id": "4450050",
+   "title": "CVU vs. Seawolves",
+   "date": "2026-09-18T22:50:00Z",
    "season": 2026,
    "sport": "Football",
    "status": "Archived",
-   "home": "Middlebury",
-   "away": "St. Johnsbury",
+   "home": "Seawolves",
+   "away": "CVU",
    "teams": [
-    "St. Johnsbury",
-    "Middlebury"
+    "CVU",
+    "Seawolves"
    ],
    "teamSlugs": [
-    "st-johnsbury",
-    "middlebury"
+    "cvu",
+    "seawolves"
    ],
    "round": "",
-   "durationSec": 9030,
-   "embedUrl": "https://vcloud.hudl.com/broadcast/embed/4450051?autoplay=0",
-   "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/43/62/50/0/4362500.png",
-   "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4450051",
-   "pageUrl": "https://www.nsnsports.net/sponsors/crosstown-littleton/?bfplayvid=4450051",
+   "durationSec": 10690,
+   "embedUrl": "https://vcloud.hudl.com/broadcast/embed/4450050?autoplay=0",
+   "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/56/08/41/5/5608415.png",
+   "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4450050",
+   "pageUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4450050",
    "requiresLogin": false,
-   "source": "LittletonChevy"
+   "source": "NSN High Vermont"
   },
   {
    "id": "4450056",
@@ -702,6 +730,32 @@
    "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/43/62/50/0/4362500.png",
    "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4450056",
    "pageUrl": "https://www.nsnsports.net/sponsors/crosstown-littleton/?bfplayvid=4450056",
+   "requiresLogin": false,
+   "source": "LittletonChevy"
+  },
+  {
+   "id": "4450051",
+   "title": "St. Johnsbury vs. Middlebury",
+   "date": "2026-09-18T22:45:00Z",
+   "season": 2026,
+   "sport": "Football",
+   "status": "Archived",
+   "home": "Middlebury",
+   "away": "St. Johnsbury",
+   "teams": [
+    "St. Johnsbury",
+    "Middlebury"
+   ],
+   "teamSlugs": [
+    "st-johnsbury",
+    "middlebury"
+   ],
+   "round": "",
+   "durationSec": 9030,
+   "embedUrl": "https://vcloud.hudl.com/broadcast/embed/4450051?autoplay=0",
+   "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/43/62/50/0/4362500.png",
+   "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4450051",
+   "pageUrl": "https://www.nsnsports.net/sponsors/crosstown-littleton/?bfplayvid=4450051",
    "requiresLogin": false,
    "source": "LittletonChevy"
   },
@@ -732,32 +786,6 @@
    "source": "LittletonChevy"
   },
   {
-   "id": "4413394",
-   "title": "Rice vs Mt. Mansfield",
-   "date": "2026-09-12T16:50:00Z",
-   "season": 2026,
-   "sport": "Football",
-   "status": "Archived",
-   "home": "Mt. Mansfield",
-   "away": "Rice Memorial",
-   "teams": [
-    "Rice Memorial",
-    "Mt. Mansfield"
-   ],
-   "teamSlugs": [
-    "rice-memorial",
-    "mt-mansfield"
-   ],
-   "round": "",
-   "durationSec": 9480,
-   "embedUrl": "https://vcloud.hudl.com/broadcast/embed/4413394?autoplay=0",
-   "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/55/84/63/3/5584633.png",
-   "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4413394",
-   "pageUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4413394",
-   "requiresLogin": false,
-   "source": "NSN High Vermont"
-  },
-  {
    "id": "4412705",
    "title": "U-32 vs. Lyndon Institute",
    "date": "2026-09-12T16:50:00Z",
@@ -782,84 +810,6 @@
    "pageUrl": "https://www.nsnsports.net/sponsors/crosstown-littleton/?bfplayvid=4412705",
    "requiresLogin": false,
    "source": "LittletonChevy"
-  },
-  {
-   "id": "4412621",
-   "title": "Milton vs. Missisquoi",
-   "date": "2026-09-12T16:50:00Z",
-   "season": 2026,
-   "sport": "Football",
-   "status": "Archived",
-   "home": "Missisquoi",
-   "away": "Milton",
-   "teams": [
-    "Milton",
-    "Missisquoi"
-   ],
-   "teamSlugs": [
-    "milton",
-    "missisquoi"
-   ],
-   "round": "",
-   "durationSec": 8180,
-   "embedUrl": "https://vcloud.hudl.com/broadcast/embed/4412621?autoplay=0",
-   "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/55/91/55/3/5591553.png",
-   "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4412621",
-   "pageUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4412621",
-   "requiresLogin": false,
-   "source": "NSN High Vermont"
-  },
-  {
-   "id": "4413273",
-   "title": "Mt. Abraham vs Windsor",
-   "date": "2026-09-12T16:50:00Z",
-   "season": 2026,
-   "sport": "Football",
-   "status": "Archived",
-   "home": "Windsor",
-   "away": "Mt. Abraham/Vergennes",
-   "teams": [
-    "Mt. Abraham/Vergennes",
-    "Windsor"
-   ],
-   "teamSlugs": [
-    "mt-abraham-vergennes",
-    "windsor"
-   ],
-   "round": "",
-   "durationSec": 9010,
-   "embedUrl": "https://vcloud.hudl.com/broadcast/embed/4413273?autoplay=0",
-   "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/32/28/89/0/3228890.png",
-   "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4413273",
-   "pageUrl": "https://www.nsnsports.net/sponsors/vt-plumbing/?bfplayvid=4413273",
-   "requiresLogin": false,
-   "source": "VT Plumbing Heating"
-  },
-  {
-   "id": "4413087",
-   "title": "Middlebury vs CVU",
-   "date": "2026-09-12T16:50:00Z",
-   "season": 2026,
-   "sport": "Football",
-   "status": "Archived",
-   "home": "CVU",
-   "away": "Middlebury",
-   "teams": [
-    "Middlebury",
-    "CVU"
-   ],
-   "teamSlugs": [
-    "middlebury",
-    "cvu"
-   ],
-   "round": "",
-   "durationSec": 9170,
-   "embedUrl": "https://vcloud.hudl.com/broadcast/embed/4413087?autoplay=0",
-   "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/32/28/89/0/3228890.png",
-   "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4413087",
-   "pageUrl": "https://www.nsnsports.net/sponsors/dennis-newton/?bfplayvid=4413087",
-   "requiresLogin": false,
-   "source": "Dennis Newton Electrical"
   },
   {
    "id": "4413106",
@@ -888,6 +838,110 @@
    "source": "Northwestern Medical Center"
   },
   {
+   "id": "4413273",
+   "title": "Mt. Abraham vs Windsor",
+   "date": "2026-09-12T16:50:00Z",
+   "season": 2026,
+   "sport": "Football",
+   "status": "Archived",
+   "home": "Windsor",
+   "away": "Mt. Abraham/Vergennes",
+   "teams": [
+    "Mt. Abraham/Vergennes",
+    "Windsor"
+   ],
+   "teamSlugs": [
+    "mt-abraham-vergennes",
+    "windsor"
+   ],
+   "round": "",
+   "durationSec": 9010,
+   "embedUrl": "https://vcloud.hudl.com/broadcast/embed/4413273?autoplay=0",
+   "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/32/28/89/0/3228890.png",
+   "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4413273",
+   "pageUrl": "https://www.nsnsports.net/sponsors/vt-plumbing/?bfplayvid=4413273",
+   "requiresLogin": false,
+   "source": "VT Plumbing Heating"
+  },
+  {
+   "id": "4412621",
+   "title": "Milton vs. Missisquoi",
+   "date": "2026-09-12T16:50:00Z",
+   "season": 2026,
+   "sport": "Football",
+   "status": "Archived",
+   "home": "Missisquoi",
+   "away": "Milton",
+   "teams": [
+    "Milton",
+    "Missisquoi"
+   ],
+   "teamSlugs": [
+    "milton",
+    "missisquoi"
+   ],
+   "round": "",
+   "durationSec": 8180,
+   "embedUrl": "https://vcloud.hudl.com/broadcast/embed/4412621?autoplay=0",
+   "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/55/91/55/3/5591553.png",
+   "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4412621",
+   "pageUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4412621",
+   "requiresLogin": false,
+   "source": "NSN High Vermont"
+  },
+  {
+   "id": "4413394",
+   "title": "Rice vs Mt. Mansfield",
+   "date": "2026-09-12T16:50:00Z",
+   "season": 2026,
+   "sport": "Football",
+   "status": "Archived",
+   "home": "Mt. Mansfield",
+   "away": "Rice Memorial",
+   "teams": [
+    "Rice Memorial",
+    "Mt. Mansfield"
+   ],
+   "teamSlugs": [
+    "rice-memorial",
+    "mt-mansfield"
+   ],
+   "round": "",
+   "durationSec": 9480,
+   "embedUrl": "https://vcloud.hudl.com/broadcast/embed/4413394?autoplay=0",
+   "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/55/84/63/3/5584633.png",
+   "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4413394",
+   "pageUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4413394",
+   "requiresLogin": false,
+   "source": "NSN High Vermont"
+  },
+  {
+   "id": "4413087",
+   "title": "Middlebury vs CVU",
+   "date": "2026-09-12T16:50:00Z",
+   "season": 2026,
+   "sport": "Football",
+   "status": "Archived",
+   "home": "CVU",
+   "away": "Middlebury",
+   "teams": [
+    "Middlebury",
+    "CVU"
+   ],
+   "teamSlugs": [
+    "middlebury",
+    "cvu"
+   ],
+   "round": "",
+   "durationSec": 9170,
+   "embedUrl": "https://vcloud.hudl.com/broadcast/embed/4413087?autoplay=0",
+   "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/32/28/89/0/3228890.png",
+   "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4413087",
+   "pageUrl": "https://www.nsnsports.net/sponsors/dennis-newton/?bfplayvid=4413087",
+   "requiresLogin": false,
+   "source": "Dennis Newton Electrical"
+  },
+  {
    "id": "4413043",
    "title": "Bellows Falls vs Fair Haven",
    "date": "2026-09-11T23:20:00Z",
@@ -912,58 +966,6 @@
    "pageUrl": "https://www.nsnsports.net/sponsors/lovell-farms/?bfplayvid=4413043",
    "requiresLogin": false,
    "source": "Lovell Farms"
-  },
-  {
-   "id": "4412703",
-   "title": "North Country vs. Woodstock",
-   "date": "2026-09-11T22:50:00Z",
-   "season": 2026,
-   "sport": "Football",
-   "status": "Archived",
-   "home": "Woodstock",
-   "away": "North Country",
-   "teams": [
-    "North Country",
-    "Woodstock"
-   ],
-   "teamSlugs": [
-    "north-country",
-    "woodstock"
-   ],
-   "round": "",
-   "durationSec": 7370,
-   "embedUrl": "https://vcloud.hudl.com/broadcast/embed/4412703?autoplay=0",
-   "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/43/62/50/0/4362500.png",
-   "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4412703",
-   "pageUrl": "https://www.nsnsports.net/sponsors/crosstown-littleton/?bfplayvid=4412703",
-   "requiresLogin": false,
-   "source": "LittletonChevy"
-  },
-  {
-   "id": "4412619",
-   "title": "Mill River vs. Spaulding",
-   "date": "2026-09-11T22:50:00Z",
-   "season": 2026,
-   "sport": "Football",
-   "status": "Archived",
-   "home": "Spaulding",
-   "away": "Mill River",
-   "teams": [
-    "Mill River",
-    "Spaulding"
-   ],
-   "teamSlugs": [
-    "mill-river",
-    "spaulding"
-   ],
-   "round": "",
-   "durationSec": 8050,
-   "embedUrl": "https://vcloud.hudl.com/broadcast/embed/4412619?autoplay=0",
-   "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/23/62/06/236206.png",
-   "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4412619",
-   "pageUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4412619",
-   "requiresLogin": false,
-   "source": "NSN High Vermont"
   },
   {
    "id": "4413640",
@@ -992,30 +994,30 @@
    "source": "NSN High Vermont"
   },
   {
-   "id": "4412620",
-   "title": "Springfield vs. Beekmantown, NY",
+   "id": "4412703",
+   "title": "North Country vs. Woodstock",
    "date": "2026-09-11T22:50:00Z",
    "season": 2026,
    "sport": "Football",
    "status": "Archived",
-   "home": "Beekmantown, NY",
-   "away": "Springfield",
+   "home": "Woodstock",
+   "away": "North Country",
    "teams": [
-    "Springfield",
-    "Beekmantown, NY"
+    "North Country",
+    "Woodstock"
    ],
    "teamSlugs": [
-    "springfield",
-    "beekmantown-ny"
+    "north-country",
+    "woodstock"
    ],
    "round": "",
-   "durationSec": 9340,
-   "embedUrl": "https://vcloud.hudl.com/broadcast/embed/4412620?autoplay=0",
-   "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/55/84/59/9/5584599.png",
-   "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4412620",
-   "pageUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4412620",
+   "durationSec": 7370,
+   "embedUrl": "https://vcloud.hudl.com/broadcast/embed/4412703?autoplay=0",
+   "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/43/62/50/0/4362500.png",
+   "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4412703",
+   "pageUrl": "https://www.nsnsports.net/sponsors/crosstown-littleton/?bfplayvid=4412703",
    "requiresLogin": false,
-   "source": "NSN High Vermont"
+   "source": "LittletonChevy"
   },
   {
    "id": "4412788",
@@ -1044,6 +1046,32 @@
    "source": "Hartford Auto"
   },
   {
+   "id": "4412619",
+   "title": "Mill River vs. Spaulding",
+   "date": "2026-09-11T22:50:00Z",
+   "season": 2026,
+   "sport": "Football",
+   "status": "Archived",
+   "home": "Spaulding",
+   "away": "Mill River",
+   "teams": [
+    "Mill River",
+    "Spaulding"
+   ],
+   "teamSlugs": [
+    "mill-river",
+    "spaulding"
+   ],
+   "round": "",
+   "durationSec": 8050,
+   "embedUrl": "https://vcloud.hudl.com/broadcast/embed/4412619?autoplay=0",
+   "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/23/62/06/236206.png",
+   "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4412619",
+   "pageUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4412619",
+   "requiresLogin": false,
+   "source": "NSN High Vermont"
+  },
+  {
    "id": "4412701",
    "title": "St. Johnsbury vs. Brattleboro",
    "date": "2026-09-11T22:40:00Z",
@@ -1070,32 +1098,6 @@
    "source": "LittletonChevy"
   },
   {
-   "id": "4403971",
-   "title": "Essex vs Colchester",
-   "date": "2026-09-10T22:50:00Z",
-   "season": 2026,
-   "sport": "Football",
-   "status": "Archived",
-   "home": "Colchester",
-   "away": "Essex",
-   "teams": [
-    "Essex",
-    "Colchester"
-   ],
-   "teamSlugs": [
-    "essex",
-    "colchester"
-   ],
-   "round": "",
-   "durationSec": 9890,
-   "embedUrl": "https://vcloud.hudl.com/broadcast/embed/4403971?autoplay=0",
-   "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/55/83/86/1/5583861.png",
-   "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4403971",
-   "pageUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4403971",
-   "requiresLogin": false,
-   "source": "NSN High Vermont"
-  },
-  {
    "id": "4403935",
    "title": "Seawolves vs. BFA St. Albans",
    "date": "2026-09-10T22:50:00Z",
@@ -1120,6 +1122,32 @@
    "pageUrl": "https://www.nsnsports.net/sponsors/nwmc/?bfplayvid=4403935",
    "requiresLogin": false,
    "source": "Northwestern Medical Center"
+  },
+  {
+   "id": "4403971",
+   "title": "Essex vs Colchester",
+   "date": "2026-09-10T22:50:00Z",
+   "season": 2026,
+   "sport": "Football",
+   "status": "Archived",
+   "home": "Colchester",
+   "away": "Essex",
+   "teams": [
+    "Essex",
+    "Colchester"
+   ],
+   "teamSlugs": [
+    "essex",
+    "colchester"
+   ],
+   "round": "",
+   "durationSec": 9890,
+   "embedUrl": "https://vcloud.hudl.com/broadcast/embed/4403971?autoplay=0",
+   "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/55/83/86/1/5583861.png",
+   "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4403971",
+   "pageUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4403971",
+   "requiresLogin": false,
+   "source": "NSN High Vermont"
   },
   {
    "id": "4363961",
@@ -1174,6 +1202,32 @@
    "source": "NSN High Vermont"
   },
   {
+   "id": "4336759",
+   "title": "Fairfax/Lamoille vs. Rice",
+   "date": "2026-09-05T17:00:00Z",
+   "season": 2026,
+   "sport": "Football",
+   "status": "Archived",
+   "home": "Rice Memorial",
+   "away": "Fairfax/Lamoille",
+   "teams": [
+    "Fairfax/Lamoille",
+    "Rice Memorial"
+   ],
+   "teamSlugs": [
+    "fairfax-lamoille",
+    "rice-memorial"
+   ],
+   "round": "",
+   "durationSec": 11270,
+   "embedUrl": "https://vcloud.hudl.com/broadcast/embed/4336759?autoplay=0",
+   "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/43/81/40/7/4381407.png",
+   "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4336759",
+   "pageUrl": "https://www.nsnsports.net/sponsors/nwmc/?bfplayvid=4336759",
+   "requiresLogin": false,
+   "source": "Northwestern Medical Center"
+  },
+  {
    "id": "4336786",
    "title": "Otter Valley vs. Mill River",
    "date": "2026-09-05T17:00:00Z",
@@ -1226,32 +1280,6 @@
    "source": "NSN High Vermont"
   },
   {
-   "id": "4336759",
-   "title": "Fairfax/Lamoille vs. Rice",
-   "date": "2026-09-05T17:00:00Z",
-   "season": 2026,
-   "sport": "Football",
-   "status": "Archived",
-   "home": "Rice Memorial",
-   "away": "Fairfax/Lamoille",
-   "teams": [
-    "Fairfax/Lamoille",
-    "Rice Memorial"
-   ],
-   "teamSlugs": [
-    "fairfax-lamoille",
-    "rice-memorial"
-   ],
-   "round": "",
-   "durationSec": 11270,
-   "embedUrl": "https://vcloud.hudl.com/broadcast/embed/4336759?autoplay=0",
-   "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/43/81/40/7/4381407.png",
-   "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4336759",
-   "pageUrl": "https://www.nsnsports.net/sponsors/nwmc/?bfplayvid=4336759",
-   "requiresLogin": false,
-   "source": "Northwestern Medical Center"
-  },
-  {
    "id": "4363926",
    "title": "Hartford vs CVU",
    "date": "2026-09-05T16:45:00Z",
@@ -1276,6 +1304,84 @@
    "pageUrl": "https://www.nsnsports.net/sponsors/hartford-auto/?bfplayvid=4363926",
    "requiresLogin": false,
    "source": "Hartford Auto"
+  },
+  {
+   "id": "4334577",
+   "title": "Seawolves vs. Mt. Anthony",
+   "date": "2026-09-04T23:00:00Z",
+   "season": 2026,
+   "sport": "Football",
+   "status": "Archived",
+   "home": "Mt. Anthony",
+   "away": "Seawolves",
+   "teams": [
+    "Seawolves",
+    "Mt. Anthony"
+   ],
+   "teamSlugs": [
+    "seawolves",
+    "mt-anthony"
+   ],
+   "round": "",
+   "durationSec": 11280,
+   "embedUrl": "https://vcloud.hudl.com/broadcast/embed/4334577?autoplay=0",
+   "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/32/28/89/0/3228890.png",
+   "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4334577",
+   "pageUrl": "https://www.nsnsports.net/sponsors/vfn/?bfplayvid=4334577",
+   "requiresLogin": false,
+   "source": "VFN"
+  },
+  {
+   "id": "4334576",
+   "title": "Mt. Mansfield vs. Colchester",
+   "date": "2026-09-04T23:00:00Z",
+   "season": 2026,
+   "sport": "Football",
+   "status": "Archived",
+   "home": "Colchester",
+   "away": "Mt. Mansfield",
+   "teams": [
+    "Mt. Mansfield",
+    "Colchester"
+   ],
+   "teamSlugs": [
+    "mt-mansfield",
+    "colchester"
+   ],
+   "round": "",
+   "durationSec": 11320,
+   "embedUrl": "https://vcloud.hudl.com/broadcast/embed/4334576?autoplay=0",
+   "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/32/28/89/0/3228890.png",
+   "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4334576",
+   "pageUrl": "https://www.nsnsports.net/sponsors/vfn/?bfplayvid=4334576",
+   "requiresLogin": false,
+   "source": "VFN"
+  },
+  {
+   "id": "4336758",
+   "title": "Rutland vs. BFA-St. Albans",
+   "date": "2026-09-04T23:00:00Z",
+   "season": 2026,
+   "sport": "Football",
+   "status": "Archived",
+   "home": "BFA-St. Albans",
+   "away": "Rutland",
+   "teams": [
+    "Rutland",
+    "BFA-St. Albans"
+   ],
+   "teamSlugs": [
+    "rutland",
+    "bfa-st-albans"
+   ],
+   "round": "",
+   "durationSec": 10120,
+   "embedUrl": "https://vcloud.hudl.com/broadcast/embed/4336758?autoplay=0",
+   "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/43/81/40/7/4381407.png",
+   "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4336758",
+   "pageUrl": "https://www.nsnsports.net/sponsors/nwmc/?bfplayvid=4336758",
+   "requiresLogin": false,
+   "source": "Northwestern Medical Center"
   },
   {
    "id": "4336083",
@@ -1304,32 +1410,6 @@
    "source": "LittletonChevy"
   },
   {
-   "id": "4336082",
-   "title": "Essex vs. St. Johnsbury",
-   "date": "2026-09-04T23:00:00Z",
-   "season": 2026,
-   "sport": "Football",
-   "status": "Archived",
-   "home": "St. Johnsbury",
-   "away": "Essex",
-   "teams": [
-    "Essex",
-    "St. Johnsbury"
-   ],
-   "teamSlugs": [
-    "essex",
-    "st-johnsbury"
-   ],
-   "round": "",
-   "durationSec": 9980,
-   "embedUrl": "https://vcloud.hudl.com/broadcast/embed/4336082?autoplay=0",
-   "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/43/62/50/0/4362500.png",
-   "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4336082",
-   "pageUrl": "https://www.nsnsports.net/sponsors/crosstown-littleton/?bfplayvid=4336082",
-   "requiresLogin": false,
-   "source": "LittletonChevy"
-  },
-  {
    "id": "4334579",
    "title": "U-32 vs. Fair Haven",
    "date": "2026-09-04T23:00:00Z",
@@ -1354,6 +1434,32 @@
    "pageUrl": "https://www.nsnsports.net/sponsors/vfn/?bfplayvid=4334579",
    "requiresLogin": false,
    "source": "VFN"
+  },
+  {
+   "id": "4336082",
+   "title": "Essex vs. St. Johnsbury",
+   "date": "2026-09-04T23:00:00Z",
+   "season": 2026,
+   "sport": "Football",
+   "status": "Archived",
+   "home": "St. Johnsbury",
+   "away": "Essex",
+   "teams": [
+    "Essex",
+    "St. Johnsbury"
+   ],
+   "teamSlugs": [
+    "essex",
+    "st-johnsbury"
+   ],
+   "round": "",
+   "durationSec": 9980,
+   "embedUrl": "https://vcloud.hudl.com/broadcast/embed/4336082?autoplay=0",
+   "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/43/62/50/0/4362500.png",
+   "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=4336082",
+   "pageUrl": "https://www.nsnsports.net/sponsors/crosstown-littleton/?bfplayvid=4336082",
+   "requiresLogin": false,
+   "source": "LittletonChevy"
   },
   {
    "id": "4334578",
@@ -1975,32 +2081,6 @@
    "source": "VFN"
   },
   {
-   "id": "2929708",
-   "title": "Milton vs Rice",
-   "date": "2025-10-18T16:45:00Z",
-   "season": 2025,
-   "sport": "Football",
-   "status": "Archived",
-   "home": "Rice Memorial",
-   "away": "Milton",
-   "teams": [
-    "Milton",
-    "Rice Memorial"
-   ],
-   "teamSlugs": [
-    "milton",
-    "rice-memorial"
-   ],
-   "round": "",
-   "durationSec": 7860,
-   "embedUrl": "https://vcloud.hudl.com/broadcast/embed/2929708?autoplay=0",
-   "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/43/81/40/7/4381407.png",
-   "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=2929708",
-   "pageUrl": "https://www.nsnsports.net/sponsors/nwmc/?bfplayvid=2929708",
-   "requiresLogin": false,
-   "source": "Northwestern Medical Center"
-  },
-  {
    "id": "2929717",
    "title": "Fairfax vs Missisquoi",
    "date": "2025-10-18T16:45:00Z",
@@ -2027,56 +2107,30 @@
    "source": "Northwestern Medical Center"
   },
   {
-   "id": "2923820",
-   "title": "Essex vs BFA St. Albans",
-   "date": "2025-10-17T22:45:00Z",
+   "id": "2929708",
+   "title": "Milton vs Rice",
+   "date": "2025-10-18T16:45:00Z",
    "season": 2025,
    "sport": "Football",
    "status": "Archived",
-   "home": "BFA-St. Albans",
-   "away": "Essex",
+   "home": "Rice Memorial",
+   "away": "Milton",
    "teams": [
-    "Essex",
-    "BFA-St. Albans"
+    "Milton",
+    "Rice Memorial"
    ],
    "teamSlugs": [
-    "essex",
-    "bfa-st-albans"
+    "milton",
+    "rice-memorial"
    ],
    "round": "",
-   "durationSec": 9550,
-   "embedUrl": "https://vcloud.hudl.com/broadcast/embed/2923820?autoplay=0",
+   "durationSec": 7860,
+   "embedUrl": "https://vcloud.hudl.com/broadcast/embed/2929708?autoplay=0",
    "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/43/81/40/7/4381407.png",
-   "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=2923820",
-   "pageUrl": "https://www.nsnsports.net/sponsors/nwmc/?bfplayvid=2923820",
+   "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=2929708",
+   "pageUrl": "https://www.nsnsports.net/sponsors/nwmc/?bfplayvid=2929708",
    "requiresLogin": false,
    "source": "Northwestern Medical Center"
-  },
-  {
-   "id": "2930471",
-   "title": "Burr & Burton vs Middlebury",
-   "date": "2025-10-17T22:45:00Z",
-   "season": 2025,
-   "sport": "Football",
-   "status": "Archived",
-   "home": "Middlebury",
-   "away": "Burr & Burton",
-   "teams": [
-    "Burr & Burton",
-    "Middlebury"
-   ],
-   "teamSlugs": [
-    "burr-burton",
-    "middlebury"
-   ],
-   "round": "",
-   "durationSec": 7610,
-   "embedUrl": "https://vcloud.hudl.com/broadcast/embed/2930471?autoplay=0",
-   "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/23/62/06/236206.png",
-   "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=2930471",
-   "pageUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=2930471",
-   "requiresLogin": false,
-   "source": "NSN High Vermont"
   },
   {
    "id": "2929738",
@@ -2131,32 +2185,6 @@
    "source": "NSN High Vermont"
   },
   {
-   "id": "2930474",
-   "title": "Brattleboro vs Mt. Anthony",
-   "date": "2025-10-17T22:45:00Z",
-   "season": 2025,
-   "sport": "Football",
-   "status": "Archived",
-   "home": "Mt. Anthony",
-   "away": "Brattleboro",
-   "teams": [
-    "Brattleboro",
-    "Mt. Anthony"
-   ],
-   "teamSlugs": [
-    "brattleboro",
-    "mt-anthony"
-   ],
-   "round": "",
-   "durationSec": 9510,
-   "embedUrl": "https://vcloud.hudl.com/broadcast/embed/2930474?autoplay=0",
-   "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/23/62/06/236206.png",
-   "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=2930474",
-   "pageUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=2930474",
-   "requiresLogin": false,
-   "source": "NSN High Vermont"
-  },
-  {
    "id": "2923798",
    "title": "Brattleboro vs Mt. Anthony",
    "date": "2025-10-17T22:45:00Z",
@@ -2183,30 +2211,82 @@
    "source": "VFN"
   },
   {
-   "id": "2679352",
-   "title": "Lyndon Institute vs North Country",
-   "date": "2025-10-17T22:30:00Z",
+   "id": "2923820",
+   "title": "Essex vs BFA St. Albans",
+   "date": "2025-10-17T22:45:00Z",
    "season": 2025,
    "sport": "Football",
    "status": "Archived",
-   "home": "North Country",
-   "away": "Lyndon Institute",
+   "home": "BFA-St. Albans",
+   "away": "Essex",
    "teams": [
-    "Lyndon Institute",
-    "North Country"
+    "Essex",
+    "BFA-St. Albans"
    ],
    "teamSlugs": [
-    "lyndon-institute",
-    "north-country"
+    "essex",
+    "bfa-st-albans"
    ],
    "round": "",
-   "durationSec": 9870,
-   "embedUrl": "https://vcloud.hudl.com/broadcast/embed/2679352?autoplay=0",
-   "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/43/62/50/0/4362500.png",
-   "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=2679352",
-   "pageUrl": "https://www.nsnsports.net/sponsors/crosstown-littleton/?bfplayvid=2679352",
+   "durationSec": 9550,
+   "embedUrl": "https://vcloud.hudl.com/broadcast/embed/2923820?autoplay=0",
+   "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/43/81/40/7/4381407.png",
+   "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=2923820",
+   "pageUrl": "https://www.nsnsports.net/sponsors/nwmc/?bfplayvid=2923820",
    "requiresLogin": false,
-   "source": "LittletonChevy"
+   "source": "Northwestern Medical Center"
+  },
+  {
+   "id": "2930474",
+   "title": "Brattleboro vs Mt. Anthony",
+   "date": "2025-10-17T22:45:00Z",
+   "season": 2025,
+   "sport": "Football",
+   "status": "Archived",
+   "home": "Mt. Anthony",
+   "away": "Brattleboro",
+   "teams": [
+    "Brattleboro",
+    "Mt. Anthony"
+   ],
+   "teamSlugs": [
+    "brattleboro",
+    "mt-anthony"
+   ],
+   "round": "",
+   "durationSec": 9510,
+   "embedUrl": "https://vcloud.hudl.com/broadcast/embed/2930474?autoplay=0",
+   "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/23/62/06/236206.png",
+   "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=2930474",
+   "pageUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=2930474",
+   "requiresLogin": false,
+   "source": "NSN High Vermont"
+  },
+  {
+   "id": "2930471",
+   "title": "Burr & Burton vs Middlebury",
+   "date": "2025-10-17T22:45:00Z",
+   "season": 2025,
+   "sport": "Football",
+   "status": "Archived",
+   "home": "Middlebury",
+   "away": "Burr & Burton",
+   "teams": [
+    "Burr & Burton",
+    "Middlebury"
+   ],
+   "teamSlugs": [
+    "burr-burton",
+    "middlebury"
+   ],
+   "round": "",
+   "durationSec": 7610,
+   "embedUrl": "https://vcloud.hudl.com/broadcast/embed/2930471?autoplay=0",
+   "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/23/62/06/236206.png",
+   "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=2930471",
+   "pageUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=2930471",
+   "requiresLogin": false,
+   "source": "NSN High Vermont"
   },
   {
    "id": "2679202",
@@ -2231,6 +2311,32 @@
    "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/43/62/50/0/4362500.png",
    "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=2679202",
    "pageUrl": "https://www.nsnsports.net/sponsors/crosstown-littleton/?bfplayvid=2679202",
+   "requiresLogin": false,
+   "source": "LittletonChevy"
+  },
+  {
+   "id": "2679352",
+   "title": "Lyndon Institute vs North Country",
+   "date": "2025-10-17T22:30:00Z",
+   "season": 2025,
+   "sport": "Football",
+   "status": "Archived",
+   "home": "North Country",
+   "away": "Lyndon Institute",
+   "teams": [
+    "Lyndon Institute",
+    "North Country"
+   ],
+   "teamSlugs": [
+    "lyndon-institute",
+    "north-country"
+   ],
+   "round": "",
+   "durationSec": 9870,
+   "embedUrl": "https://vcloud.hudl.com/broadcast/embed/2679352?autoplay=0",
+   "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/43/62/50/0/4362500.png",
+   "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=2679352",
+   "pageUrl": "https://www.nsnsports.net/sponsors/crosstown-littleton/?bfplayvid=2679352",
    "requiresLogin": false,
    "source": "LittletonChevy"
   },
@@ -2285,6 +2391,32 @@
    "pageUrl": "https://www.nsnsports.net/sponsors/crosstown-littleton/?bfplayvid=2679341",
    "requiresLogin": false,
    "source": "LittletonChevy"
+  },
+  {
+   "id": "2897797",
+   "title": "Rutland vs Brattleboro",
+   "date": "2025-10-10T22:45:00Z",
+   "season": 2025,
+   "sport": "Football",
+   "status": "Archived",
+   "home": "Brattleboro",
+   "away": "Rutland",
+   "teams": [
+    "Rutland",
+    "Brattleboro"
+   ],
+   "teamSlugs": [
+    "rutland",
+    "brattleboro"
+   ],
+   "round": "",
+   "durationSec": 9110,
+   "embedUrl": "https://vcloud.hudl.com/broadcast/embed/2897797?autoplay=0",
+   "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/23/62/06/236206.png",
+   "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=2897797",
+   "pageUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=2897797",
+   "requiresLogin": false,
+   "source": "NSN High Vermont"
   },
   {
    "id": "2897801",
@@ -2964,32 +3096,6 @@
    "source": "Northwestern Medical Center"
   },
   {
-   "id": "2750215",
-   "title": "Rutland vs Middlebury",
-   "date": "2025-09-19T22:40:00Z",
-   "season": 2025,
-   "sport": "Football",
-   "status": "Archived",
-   "home": "Middlebury",
-   "away": "Rutland",
-   "teams": [
-    "Rutland",
-    "Middlebury"
-   ],
-   "teamSlugs": [
-    "rutland",
-    "middlebury"
-   ],
-   "round": "",
-   "durationSec": 9390,
-   "embedUrl": "https://vcloud.hudl.com/broadcast/embed/2750215?autoplay=0",
-   "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/23/62/06/236206.png",
-   "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=2750215",
-   "pageUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=2750215",
-   "requiresLogin": false,
-   "source": "NSN High Vermont"
-  },
-  {
    "id": "2773249",
    "title": "Mt. Mansfield vs Fair Haven",
    "date": "2025-09-19T22:40:00Z",
@@ -3012,6 +3118,32 @@
    "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/23/62/06/236206.png",
    "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=2773249",
    "pageUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=2773249",
+   "requiresLogin": false,
+   "source": "NSN High Vermont"
+  },
+  {
+   "id": "2750215",
+   "title": "Rutland vs Middlebury",
+   "date": "2025-09-19T22:40:00Z",
+   "season": 2025,
+   "sport": "Football",
+   "status": "Archived",
+   "home": "Middlebury",
+   "away": "Rutland",
+   "teams": [
+    "Rutland",
+    "Middlebury"
+   ],
+   "teamSlugs": [
+    "rutland",
+    "middlebury"
+   ],
+   "round": "",
+   "durationSec": 9390,
+   "embedUrl": "https://vcloud.hudl.com/broadcast/embed/2750215?autoplay=0",
+   "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/23/62/06/236206.png",
+   "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=2750215",
+   "pageUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=2750215",
    "requiresLogin": false,
    "source": "NSN High Vermont"
   },
@@ -3278,32 +3410,6 @@
    "source": "LittletonChevy"
   },
   {
-   "id": "2747783",
-   "title": "Mt. Anthony vs Hartford",
-   "date": "2025-09-12T22:40:00Z",
-   "season": 2025,
-   "sport": "Football",
-   "status": "Archived",
-   "home": "Hartford",
-   "away": "Mt. Anthony",
-   "teams": [
-    "Mt. Anthony",
-    "Hartford"
-   ],
-   "teamSlugs": [
-    "mt-anthony",
-    "hartford"
-   ],
-   "round": "",
-   "durationSec": 10050,
-   "embedUrl": "https://vcloud.hudl.com/broadcast/embed/2747783?autoplay=0",
-   "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/23/62/06/236206.png",
-   "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=2747783",
-   "pageUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=2747783",
-   "requiresLogin": false,
-   "source": "NSN High Vermont"
-  },
-  {
    "id": "2747781",
    "title": "Essex vs Seawolves",
    "date": "2025-09-12T22:40:00Z",
@@ -3326,6 +3432,32 @@
    "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/23/62/06/236206.png",
    "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=2747781",
    "pageUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=2747781",
+   "requiresLogin": false,
+   "source": "NSN High Vermont"
+  },
+  {
+   "id": "2747783",
+   "title": "Mt. Anthony vs Hartford",
+   "date": "2025-09-12T22:40:00Z",
+   "season": 2025,
+   "sport": "Football",
+   "status": "Archived",
+   "home": "Hartford",
+   "away": "Mt. Anthony",
+   "teams": [
+    "Mt. Anthony",
+    "Hartford"
+   ],
+   "teamSlugs": [
+    "mt-anthony",
+    "hartford"
+   ],
+   "round": "",
+   "durationSec": 10050,
+   "embedUrl": "https://vcloud.hudl.com/broadcast/embed/2747783?autoplay=0",
+   "thumbnail": "https://d3erbgikz6mtmj.cloudfront.net/image/23/62/06/236206.png",
+   "nsnUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=2747783",
+   "pageUrl": "https://www.nsnsports.net/high-schools/vermont/?bfplayvid=2747783",
    "requiresLogin": false,
    "source": "NSN High Vermont"
   },
